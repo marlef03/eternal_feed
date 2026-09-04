@@ -1,6 +1,6 @@
-from datetime import UTC, datetime
+from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.refresh_sessions.models import RefreshSession
@@ -39,7 +39,21 @@ class RefreshSessionRepository:
 
         return result.scalar_one_or_none()
 
-    async def revoke(self, refresh_session: RefreshSession) -> None:
-        refresh_session.revoked_at = datetime.now(UTC)
+    async def revoke(
+        self,
+        session_id: int,
+        now: datetime,
+    ) -> None:
+        stmt = (
+            update(RefreshSession)
+            .where(
+                RefreshSession.id == session_id,
+                RefreshSession.revoked_at.is_(None),
+                RefreshSession.expires_at > now,
+            )
+            .values(revoked_at=now)
+        )
 
-        await self.session.flush()
+        result = await self.session.execute(stmt)
+
+        return result.rowcount == 1
