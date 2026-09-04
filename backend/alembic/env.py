@@ -5,7 +5,6 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-
 from src.core.config import settings
 from src.database.base import Base
 
@@ -13,6 +12,7 @@ from src.database.base import Base
 from src.users.models import User
 from src.posts.models import Post
 from src.comments.models import Comment
+from src.auth.refresh_sessions.models import RefreshSession
 
 
 config = context.config
@@ -52,11 +52,11 @@ async def run_async_migrations() -> None:
         config.config_ini_section,
     )
 
-    configuration['sqlalchemy.url'] = settings.database_url
+    configuration["sqlalchemy.url"] = settings.database_url
 
     connectable = async_engine_from_config(
         configuration,
-        prefix='sqlalchemy.',
+        prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
