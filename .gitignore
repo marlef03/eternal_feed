@@ -15,6 +15,7 @@ dist-ssr
 *.dev*
 media/
 vite.config.ts
+.pre-commit-config.yaml
 
 # Editor directories and files
 .vscode/*
