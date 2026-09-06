@@ -30,3 +30,5 @@ vite.config.ts
 # Python
 .venv
 __pycache__
+.ruff_cache
+.mypy_cache
