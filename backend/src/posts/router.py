@@ -45,6 +45,10 @@ async def get_post(
 )
 async def delete_post(
     post_id: int, 
-    service: PostService = Depends(get_post_service)
+    service: PostService = Depends(get_post_service),
+    current_user_id: int = Depends(get_current_user_id),
 ):
-    await service.delete_post(post_id)
+    await service.delete_post(
+        post_id,
+        current_user_id
+    )

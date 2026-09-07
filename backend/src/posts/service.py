@@ -5,6 +5,8 @@ from src.posts.models import Post
 from src.posts.repository import PostRepository
 from src.posts.schemas import PostCreate
 
+from src.core.exceptions import WrongUserError
+
 
 class PostService:
     def __init__(self, session: AsyncSession):
@@ -51,9 +53,13 @@ class PostService:
     async def delete_post(
         self,
         post_id: int,
+        current_user_id: int,
     ) -> None:
 
         post = await self.get_post_or_raise(post_id)
+
+        if current_user_id != post.author_id:
+            raise WrongUserError()
 
         await self.repository.delete(post)
 
