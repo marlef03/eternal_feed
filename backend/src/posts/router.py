@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, status
 
 from src.posts.schemas import PostCreate, PostResponse
@@ -39,16 +41,28 @@ async def get_post(
     return await service.get_post_or_raise(post_id)
 
 
+@router.get(
+    "/",
+    response_model=list[PostResponse],
+)
+async def get_posts_portion(
+    last_timestamp: datetime = None,
+    last_id: int = None,
+    service: PostService = Depends(get_post_service),
+):
+    return await service.get_posts_portion(
+        last_timestamp,
+        last_id,
+    )
+
+
 @router.delete(
     "/{post_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_post(
-    post_id: int, 
+    post_id: int,
     service: PostService = Depends(get_post_service),
     current_user_id: int = Depends(get_current_user_id),
 ):
-    await service.delete_post(
-        post_id,
-        current_user_id
-    )
+    await service.delete_post(post_id, current_user_id)

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions import PostNotFoundError
@@ -49,6 +51,14 @@ class PostService:
             raise PostNotFoundError()
 
         return post
+
+    async def get_posts_portion(
+        self,
+        last_timestamp: datetime | None,
+        last_id: datetime | None,
+    ) -> list[Post] | None:
+
+        return await self.repository.get_portion(last_timestamp, last_id)
 
     async def delete_post(
         self,
