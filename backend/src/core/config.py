@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
 
+    posts_per_update: int = 5
+
     model_config = {
         "env_file": ".env",
     }
