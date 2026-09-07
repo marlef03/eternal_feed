@@ -4,7 +4,7 @@ from src.posts.schemas import PostCreate, PostResponse
 from src.posts.service import PostService
 from src.posts.dependencies import get_post_service
 
-from src.users.dependencies import get_current_user_id
+from src.auth.dependencies import get_current_user_id
 
 router = APIRouter(
     prefix="/posts",
