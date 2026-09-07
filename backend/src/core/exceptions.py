@@ -46,7 +46,7 @@ class WrongUserError(HTTPException):
         super().__init__(
             status_code=401,
             detail=(
-                "You are not allowed to perform this"
+                "You are not allowed to perform this "
                 "command: resource belongs to different user"
             ),
         )
