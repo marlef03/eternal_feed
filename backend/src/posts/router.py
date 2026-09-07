@@ -4,6 +4,8 @@ from src.posts.schemas import PostCreate, PostResponse
 from src.posts.service import PostService
 from src.posts.dependencies import get_post_service
 
+from src.users.dependencies import get_current_user_id
+
 router = APIRouter(
     prefix="/posts",
     tags=["posts"],
@@ -18,12 +20,11 @@ router = APIRouter(
 async def create_post(
     data: PostCreate,
     service: PostService = Depends(get_post_service),
+    current_user_id: int = Depends(get_current_user_id),
 ):
-    author_id = 2  # TODO: replace with auth
-
     return await service.create_post(
         data=data,
-        author_id=author_id,
+        author_id=current_user_id,
     )
 
 
