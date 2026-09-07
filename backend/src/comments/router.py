@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.comments.schemas import CommentCreate, CommentResponse
 from src.comments.service import CommentService
 from src.comments.dependencies import get_comment_service
-from src.database.dependencies import get_db
+
+from src.auth.dependencies import get_current_user_id
 
 router = APIRouter(tags=["comments"])
 
@@ -18,12 +18,11 @@ async def create_comment(
     post_id: int,
     data: CommentCreate,
     service: CommentService = Depends(get_comment_service),
+    current_user_id: int = Depends(get_current_user_id),
 ):
-    author_id = 2  # TODO: replace with auth
-
     return await service.create_comment(
         data=data,
-        author_id=author_id,
+        author_id=current_user_id,
         post_id=post_id,
     )
 
