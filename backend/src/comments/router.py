@@ -45,5 +45,9 @@ async def get_comment(
 async def delete_comment(
     comment_id: int,
     service: CommentService = Depends(get_comment_service),
+    current_user_id: int = Depends(get_current_user_id),
 ):
-    await service.delete_comment(comment_id)
+    await service.delete_comment(
+        comment_id,
+        current_user_id,
+    )

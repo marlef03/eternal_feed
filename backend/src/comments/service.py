@@ -5,6 +5,8 @@ from src.comments.repository import CommentRepository
 from src.comments.schemas import CommentCreate
 from src.core.exceptions import CommentNotFoundError
 
+from src.core.exceptions import WrongUserError
+
 
 class CommentService:
     def __init__(self, session: AsyncSession):
@@ -52,9 +54,13 @@ class CommentService:
     async def delete_comment(
         self,
         comment_id: int,
+        current_user_id: int,
     ) -> None:
 
         comment = await self.get_comment_or_raise(comment_id)
+
+        if comment.author_id != current_user_id:
+            raise WrongUserError()
 
         await self.repository.delete(comment)
 
