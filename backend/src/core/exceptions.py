@@ -39,3 +39,12 @@ class UnauthorizedError(HTTPException):
             status_code=401,
             detail="No access, sign in please",
         )
+
+
+class WrongUserError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=401,
+            detail="You are not allowed to perform this command: \
+                resource belongs to different user",
+        )
