@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, status
 
 from src.comments.schemas import CommentCreate, CommentResponse
@@ -24,6 +26,36 @@ async def create_comment(
         data=data,
         author_id=current_user_id,
         post_id=post_id,
+    )
+
+
+@router.get(
+    "/comments/portion",
+    response_model=list[CommentResponse],
+)
+async def get_comments_portion(
+    last_timestamp: datetime,
+    last_id: int,
+    service: CommentService = Depends(get_comment_service),
+):
+    return await service.get_comments_new_portion(
+        last_timestamp,
+        last_id,
+    )
+
+
+@router.get(
+    "/comments",
+    response_model=list[CommentResponse],
+)
+async def get_comments_up_to(
+    last_timestamp: datetime | None = None,
+    last_id: int | None = None,
+    service: CommentService = Depends(get_comment_service),
+):
+    return await service.get_comments_up_to(
+        last_timestamp,
+        last_id,
     )
 
 

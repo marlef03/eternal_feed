@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.comments.models import Comment
@@ -50,6 +52,25 @@ class CommentService:
             raise CommentNotFoundError()
 
         return comment
+
+    async def get_comments_new_portion(
+        self,
+        last_timestamp: datetime | None,
+        last_id: int | None,
+    ) -> list[Comment] | None:
+
+        return await self.repository.get_portion_after(last_timestamp, last_id)
+
+    async def get_comments_up_to(
+        self,
+        last_timestamp: datetime | None,
+        last_id: int | None,
+    ) -> list[Comment] | None:
+
+        if last_timestamp is None:
+            return await self.repository.get_portion_of_first()
+
+        return await self.repository.get_portion_up_to(last_timestamp, last_id)
 
     async def delete_comment(
         self,

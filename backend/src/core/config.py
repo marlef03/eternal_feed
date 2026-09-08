@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 7
 
     posts_per_update: int = 5
+    
+    comments_per_update: int = 5
+    comments_preloaded: int = 3
 
     model_config = {
         "env_file": ".env",
