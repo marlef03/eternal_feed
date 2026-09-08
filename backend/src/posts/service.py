@@ -60,6 +60,17 @@ class PostService:
 
         return await self.repository.get_portion_after(last_timestamp, last_id)
 
+    async def get_posts_up_to(
+        self,
+        last_timestamp: datetime | None,
+        last_id: int | None,
+    ) -> list[Post] | None:
+
+        if last_timestamp is None:
+            return await self.repository.get_portion_of_first()
+
+        return await self.repository.get_portion_up_to(last_timestamp, last_id)
+
     async def delete_post(
         self,
         post_id: int,

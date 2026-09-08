@@ -46,6 +46,25 @@ class PostRepository:
 
         return result.scalars().all()
 
+    async def get_portion_up_to(
+        self,
+        last_timestamp: datetime,
+        last_id: int,
+    ) -> list[Post] | None:
+        
+        result = await self.session.execute(
+            select(Post)
+            .where(
+                or_(
+                    Post.created_at > last_timestamp,
+                    and_(Post.created_at == last_timestamp, Post.id >= last_id),
+                )
+            )
+            .order_by(Post.created_at.desc(), Post.id.desc())
+        )
+
+        return result.scalars().all()
+
     async def create(
         self,
         *,

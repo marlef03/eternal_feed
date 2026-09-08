@@ -31,17 +31,6 @@ async def create_post(
 
 
 @router.get(
-    "/{post_id}",
-    response_model=PostResponse,
-)
-async def get_post(
-    post_id: int,
-    service: PostService = Depends(get_post_service),
-):
-    return await service.get_post_or_raise(post_id)
-
-
-@router.get(
     "/portion",
     response_model=list[PostResponse],
 )
@@ -54,6 +43,32 @@ async def get_posts_portion(
         last_timestamp,
         last_id,
     )
+
+
+@router.get(
+    "/",
+    response_model=list[PostResponse],
+)
+async def get_posts_up_to(
+    last_timestamp: datetime | None = None,
+    last_id: int | None = None,
+    service: PostService = Depends(get_post_service),
+):
+    return await service.get_posts_up_to(
+        last_timestamp,
+        last_id,
+    )
+
+
+@router.get(
+    "/{post_id}",
+    response_model=PostResponse,
+)
+async def get_post(
+    post_id: int,
+    service: PostService = Depends(get_post_service),
+):
+    return await service.get_post_or_raise(post_id)
 
 
 @router.delete(
