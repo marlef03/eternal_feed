@@ -55,7 +55,7 @@ class PostService:
     async def get_posts_portion(
         self,
         last_timestamp: datetime | None,
-        last_id: datetime | None,
+        last_id: int | None,
     ) -> list[Post] | None:
 
         return await self.repository.get_portion(last_timestamp, last_id)
