@@ -52,7 +52,7 @@ class PostService:
 
         return post
 
-    async def get_posts_portion(
+    async def get_posts_new_portion(
         self,
         last_timestamp: datetime | None,
         last_id: int | None,

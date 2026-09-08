@@ -50,7 +50,7 @@ async def get_posts_portion(
     last_id: int,
     service: PostService = Depends(get_post_service),
 ):
-    return await service.get_posts_portion(
+    return await service.get_posts_new_portion(
         last_timestamp,
         last_id,
     )
