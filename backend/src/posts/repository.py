@@ -17,27 +17,32 @@ class PostRepository:
 
         return result.scalar_one_or_none()
 
-    async def get_portion(
+    async def get_portion_after(
         self,
-        last_timestamp: datetime | None,
-        last_id: int | None,
+        last_timestamp: datetime,
+        last_id: int,
     ) -> list[Post] | None:
         
-        query = (
+        result = await self.session.execute(
             select(Post)
             .order_by(Post.created_at.desc(), Post.id.desc())
             .limit(settings.posts_per_update)
-        )
-
-        if last_timestamp is not None:
-            query = query.where(
+            .where(
                 or_(
                     Post.created_at < last_timestamp,
                     and_(Post.created_at == last_timestamp, Post.id < last_id),
                 )
             )
+        )
 
-        result = await self.session.execute(query)
+        return result.scalars().all()
+
+    async def get_portion_of_first(self) -> list[Post] | None:
+        result = await self.session.execute(
+            select(Post)
+            .order_by(Post.created_at.desc(), Post.id.desc())
+            .limit(settings.posts_per_update)
+        )
 
         return result.scalars().all()
 

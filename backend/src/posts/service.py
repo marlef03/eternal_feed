@@ -58,7 +58,7 @@ class PostService:
         last_id: int | None,
     ) -> list[Post] | None:
 
-        return await self.repository.get_portion(last_timestamp, last_id)
+        return await self.repository.get_portion_after(last_timestamp, last_id)
 
     async def delete_post(
         self,
