@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 7
 
     posts_per_update: int = 5
+    posts_window_scale: int = 10
     
     comments_per_update: int = 5
     comments_preloaded: int = 3

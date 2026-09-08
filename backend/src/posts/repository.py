@@ -36,12 +36,75 @@ class PostRepository:
         )
 
         return result.scalars().all()
+    
+    async def get_portion_before(
+        self,
+        first_timestamp: datetime,
+        first_id: int,
+    ) -> list[Post] | None:
+        
+        subquery = (
+            select(Post)
+            .where(
+                or_(
+                    Post.created_at > first_timestamp,
+                    and_(Post.created_at == first_timestamp, Post.id > first_id),
+                )
+            )
+            .order_by(Post.created_at, Post.id)
+            .limit(settings.posts_per_update)
+            .subquery()
+        )
+
+        result = await self.session.execute(
+            select(Post)
+            .from_statement(
+                select(subquery)
+                .order_by(subquery.c.created_at.desc(), subquery.c.id.desc())
+            )
+            
+        )
+
+        return result.scalars().all()
+
+    async def get_portion_between(
+        self,
+        first_timestamp: datetime,
+        first_id: int,
+        last_timestamp: datetime,
+        last_id: int,
+    ) -> list[Post] | None:
+        
+        result = await self.session.execute(
+            select(Post)
+            .order_by(Post.created_at.desc(), Post.id.desc())
+            .where(
+                and_(
+                    or_(
+                        Post.created_at < first_timestamp,
+                        and_(
+                            Post.created_at == first_timestamp, 
+                            Post.id <= first_id
+                        ),
+                    ),
+                    or_(
+                        Post.created_at > last_timestamp,
+                        and_(
+                            Post.created_at == last_timestamp, 
+                            Post.id >= last_id
+                        ),
+                    )
+                )
+            )
+        )
+
+        return result.scalars().all()
 
     async def get_portion_of_first(self) -> list[Post] | None:
         result = await self.session.execute(
             select(Post)
             .order_by(Post.created_at.desc(), Post.id.desc())
-            .limit(settings.posts_per_update)
+            .limit(settings.posts_window_scale)
         )
 
         return result.scalars().all()

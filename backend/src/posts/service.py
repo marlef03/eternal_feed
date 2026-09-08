@@ -52,24 +52,45 @@ class PostService:
 
         return post
 
-    async def get_posts_new_portion(
+    async def get_posts_after(
         self,
         last_timestamp: datetime | None,
         last_id: int | None,
     ) -> list[Post] | None:
-
-        return await self.repository.get_portion_after(last_timestamp, last_id)
-
-    async def get_posts_up_to(
-        self,
-        last_timestamp: datetime | None,
-        last_id: int | None,
-    ) -> list[Post] | None:
-
+        
         if last_timestamp is None:
             return await self.repository.get_portion_of_first()
 
-        return await self.repository.get_portion_up_to(last_timestamp, last_id)
+        return await self.repository.get_portion_after(
+            last_timestamp,
+            last_id,
+        )
+    
+    async def get_posts_before(
+        self,
+        first_timestamp: datetime,
+        first_id: int,
+    ) -> list[Post] | None:
+        
+        return await self.repository.get_portion_before(
+            first_timestamp,
+            first_id,
+        )
+    
+    async def get_posts_between(
+        self,
+        first_timestamp: datetime,
+        first_id: int,
+        last_timestamp: datetime,
+        last_id: int,
+    ) -> list[Post] | None:
+        
+        return await self.repository.get_portion_between(
+            first_timestamp,
+            first_id,
+            last_timestamp,
+            last_id,
+        )
 
     async def delete_post(
         self,
