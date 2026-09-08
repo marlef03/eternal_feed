@@ -42,12 +42,12 @@ async def get_post(
 
 
 @router.get(
-    "/",
+    "/portion",
     response_model=list[PostResponse],
 )
 async def get_posts_portion(
-    last_timestamp: datetime = None,
-    last_id: int = None,
+    last_timestamp: datetime,
+    last_id: int,
     service: PostService = Depends(get_post_service),
 ):
     return await service.get_posts_portion(
