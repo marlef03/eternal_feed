@@ -30,32 +30,19 @@ async def create_comment(
 
 
 @router.get(
-    "/comments/portion",
+    "/posts/{post_id}/comments",
     response_model=list[CommentResponse],
 )
-async def get_comments_portion(
-    last_timestamp: datetime,
-    last_id: int,
+async def get_comments(
+    post_id: int,
+    before_timestamp: datetime | None = None,
+    before_id: int | None = None,
     service: CommentService = Depends(get_comment_service),
 ):
-    return await service.get_comments_new_portion(
-        last_timestamp,
-        last_id,
-    )
-
-
-@router.get(
-    "/comments",
-    response_model=list[CommentResponse],
-)
-async def get_comments_up_to(
-    last_timestamp: datetime | None = None,
-    last_id: int | None = None,
-    service: CommentService = Depends(get_comment_service),
-):
-    return await service.get_comments_up_to(
-        last_timestamp,
-        last_id,
+    return await service.get_post_comments(
+        post_id,
+        before_timestamp,
+        before_id,
     )
 
 

@@ -19,50 +19,37 @@ class CommentRepository:
 
         return result.scalar_one_or_none()
 
-    async def get_portion_after(
+    async def get_before(
         self,
-        last_timestamp: datetime,
-        last_id: int,
+        post_id: int,
+        timestamp: datetime,
+        id: int,
     ) -> list[Comment] | None:
         
         result = await self.session.execute(
             select(Comment)
+            .where(Comment.post_id == post_id)
+            .where(
+                or_(
+                    Comment.created_at < timestamp,
+                    and_(Comment.created_at == timestamp, Comment.id < id),
+                )
+            )
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_per_update)
-            .where(
-                or_(
-                    Comment.created_at < last_timestamp,
-                    and_(Comment.created_at == last_timestamp, Comment.id < last_id),
-                )
-            )
         )
 
         return result.scalars().all()
     
-    async def get_portion_of_first(self) -> list[Comment] | None:
+    async def get_latest(
+        self,
+        post_id: int,
+    ) -> list[Comment] | None:
         result = await self.session.execute(
             select(Comment)
+            .where(Comment.post_id == post_id)
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_preloaded)
-        )
-
-        return result.scalars().all()
-    
-    async def get_portion_up_to(
-        self,
-        last_timestamp: datetime,
-        last_id: int,
-    ) -> list[Comment] | None:
-        
-        result = await self.session.execute(
-            select(Comment)
-            .where(
-                or_(
-                    Comment.created_at > last_timestamp,
-                    and_(Comment.created_at == last_timestamp, Comment.id >= last_id),
-                )
-            )
-            .order_by(Comment.created_at.desc(), Comment.id.desc())
         )
 
         return result.scalars().all()
