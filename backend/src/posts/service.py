@@ -52,29 +52,18 @@ class PostService:
 
         return post
 
-    async def get_posts_after(
+    async def get_posts(
         self,
-        last_timestamp: datetime | None,
-        last_id: int | None,
+        before_timestamp: datetime | None,
+        before_id: int | None,
     ) -> list[Post] | None:
         
-        if last_timestamp is None:
-            return await self.repository.get_portion_of_first()
+        if before_timestamp is None:
+            return await self.repository.get_latest()
 
-        return await self.repository.get_portion_after(
-            last_timestamp,
-            last_id,
-        )
-    
-    async def get_posts_before(
-        self,
-        first_timestamp: datetime,
-        first_id: int,
-    ) -> list[Post] | None:
-        
-        return await self.repository.get_portion_before(
-            first_timestamp,
-            first_id,
+        return await self.repository.get_before(
+            before_timestamp,
+            before_id,
         )
     
     async def get_posts_between(

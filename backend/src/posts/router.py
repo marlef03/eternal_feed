@@ -31,51 +31,17 @@ async def create_post(
 
 
 @router.get(
-    "/after",
-    response_model=list[PostResponse],
-)
-async def get_posts_after(
-    last_timestamp: datetime | None = None,
-    last_id: int | None = None,
-    service: PostService = Depends(get_post_service),
-):
-    return await service.get_posts_after(
-        last_timestamp,
-        last_id,
-    )
-
-
-@router.get(
-    "/before",
-    response_model=list[PostResponse],
-)
-async def get_posts_before(
-    first_timestamp: datetime | None,
-    first_id: int | None,
-    service: PostService = Depends(get_post_service),
-):
-    return await service.get_posts_before(
-        first_timestamp,
-        first_id,
-    )
-
-
-@router.get(
     "/",
     response_model=list[PostResponse],
 )
-async def get_posts_between(
-    first_timestamp: datetime,
-    first_id: int,
-    last_timestamp: datetime,
-    last_id: int,
+async def get_posts(
+    before_timestamp: datetime | None = None,
+    before_id: int | None = None,
     service: PostService = Depends(get_post_service),
 ):
-    return await service.get_posts_between(
-        first_timestamp,
-        first_id,
-        last_timestamp,
-        last_id,
+    return await service.get_posts(
+        before_timestamp,
+        before_id,
     )
 
 
