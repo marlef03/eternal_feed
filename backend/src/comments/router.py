@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, status
 
-from src.comments.schemas import CommentCreate, CommentResponse
+from src.comments.schemas import CommentCreate, CommentResponse, CommentsResponse
 from src.comments.service import CommentService
 from src.comments.dependencies import get_comment_service
 
@@ -31,7 +31,7 @@ async def create_comment(
 
 @router.get(
     "/posts/{post_id}/comments",
-    response_model=list[CommentResponse],
+    response_model=CommentsResponse,
 )
 async def get_comments(
     post_id: int,
@@ -39,10 +39,15 @@ async def get_comments(
     before_id: int | None = None,
     service: CommentService = Depends(get_comment_service),
 ):
-    return await service.get_post_comments(
+    comments, has_more = await service.get_post_comments(
         post_id,
         before_timestamp,
         before_id,
+    )
+
+    return CommentsResponse(
+        items=comments,
+        has_more=has_more,
     )
 
 

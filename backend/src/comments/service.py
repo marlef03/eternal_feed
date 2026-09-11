@@ -58,7 +58,7 @@ class CommentService:
         post_id: int,
         before_timestamp: datetime | None,
         before_id: int | None,
-    ) -> list[Comment] | None:
+    ) -> tuple[list[Comment] | None, bool]:
 
         if before_timestamp is None:
             return await self.repository.get_latest(post_id)

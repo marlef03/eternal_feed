@@ -9,9 +9,14 @@ class CommentCreate(BaseModel):
 
 class CommentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
+    
     id: int
     content: str
     author_id: int
     post_id: int
     created_at: datetime
+
+
+class CommentsResponse(BaseModel):
+    items: list[CommentResponse]
+    has_more: bool

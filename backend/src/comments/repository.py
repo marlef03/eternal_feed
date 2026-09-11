@@ -24,7 +24,7 @@ class CommentRepository:
         post_id: int,
         timestamp: datetime,
         id: int,
-    ) -> list[Comment] | None:
+    ) -> tuple[list[Comment] | None, bool]:
         
         result = await self.session.execute(
             select(Comment)
@@ -36,23 +36,35 @@ class CommentRepository:
                 )
             )
             .order_by(Comment.created_at.desc(), Comment.id.desc())
-            .limit(settings.comments_per_update)
+            .limit(settings.comments_per_update + 1)
         )
 
-        return result.scalars().all()
+        data = result.scalars().all()
+        has_more = False
+
+        if len(data) == settings.comments_per_update + 1:
+            has_more = True
+
+        return (data[:-1] if has_more else data), has_more
     
     async def get_latest(
         self,
         post_id: int,
-    ) -> list[Comment] | None:
+    ) -> tuple[list[Comment] | None, bool]:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.post_id == post_id)
             .order_by(Comment.created_at.desc(), Comment.id.desc())
-            .limit(settings.comments_preloaded)
+            .limit(settings.comments_preloaded + 1)
         )
 
-        return result.scalars().all()
+        data = result.scalars().all()
+        has_more = False
+
+        if len(data) == settings.comments_preloaded + 1:
+            has_more = True
+
+        return (data[:-1] if has_more else data), has_more
 
     async def create(
         self,
