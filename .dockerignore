@@ -1,6 +1,7 @@
 .venv
 .ruff_cache
 .mypy_cache
+node_modules
 alembic
 .git
 .pre-commit-config.yaml
