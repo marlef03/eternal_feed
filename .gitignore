@@ -14,7 +14,6 @@ dist-ssr
 .env
 *.dev*
 media/
-vite.config.ts
 .pre-commit-config.yaml
 
 # Editor directories and files
