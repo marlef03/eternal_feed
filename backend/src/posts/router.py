@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.post(
-    "/",
+    "",
     response_model=PostResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -31,7 +31,7 @@ async def create_post(
 
 
 @router.get(
-    "/",
+    "",
     response_model=list[PostResponse],
 )
 async def get_posts(
