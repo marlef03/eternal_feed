@@ -6,7 +6,7 @@ export interface CommentResponse {
     author_id: number;
     created_at: string;
   }[];
-  hasMore: boolean;
+  has_more: boolean;
 }
 
 export interface CommentData {

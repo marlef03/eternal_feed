@@ -26,7 +26,7 @@ async function fetchComments({
         createdAt: new Date(item.created_at),
       })
     ),
-    hasMore: data.hasMore,
+    hasMore: data.has_more,
   };
 }
 
