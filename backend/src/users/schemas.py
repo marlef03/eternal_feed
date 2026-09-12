@@ -18,3 +18,12 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     created_at: datetime
+
+
+class UserPublicResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    display_name: str
+    username: str
+    created_at: datetime
