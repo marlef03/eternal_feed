@@ -15,11 +15,16 @@ async function fetchPosts({ pageParam }) {
 
   return data.map(
     (item) => ({
-      id: item.id,
-      title: item.title,
-      content: item.content,
-      authorId: item.author_id,
-      createdAt: new Date(item.created_at),
+      id: item.post.id,
+      title: item.post.title,
+      content: item.post.content,
+      createdAt: new Date(item.post.created_at),
+      author: {
+        id: item.author.id,
+        displayName: item.author.display_name,
+        username: item.author.username,
+        createdAt: new Date(item.author.created_at),
+      },
     })
   );
 }
@@ -67,7 +72,10 @@ function PostList() {
           title={post.title}
           content={post.content}
           createdAt={post.createdAt}
-          authorId={post.authorId}
+          authorId={post.author.id}
+          authorDisplayName={post.author.displayName}
+          authorUsername={post.author.username}
+          authorCreatedAt={post.author.createdAt}
         />
       )
     ))

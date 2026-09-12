@@ -1,15 +1,27 @@
 export interface PostResponse {
-  id: number;
-  title: string;
-  content: string;
-  author_id: number;
-  created_at: string;
+  post: {
+    id: number;
+    title: string;
+    content: string;
+    created_at: string;
+  };
+  author: {
+    id: number;
+    display_name: string;
+    username: string;
+    created_at: string;
+  }
 }
 
 export interface PostData {
   id: number;
   title: string;
   content: string;
-  authorId: number;
   createdAt: Date;
+  author: {
+    id: number;
+    displayName: string;
+    username: string;
+    createdAt: Date;
+  };
 }

@@ -5,21 +5,21 @@ function Post({
   id,
   title,
   content,
-  authorId,
   createdAt,
+  authorId,
+  authorDisplayName,
+  authorUsername,
+  authorCreatedAt,
 }: PostProps) {
   return (
-    <div key={id}>
-      <hr />
+    <div>
+      <div>{authorDisplayName}</div>
+      <div>{'@' + authorUsername}</div>
       <h2>{title}</h2>
       <p>{content}</p>
-      <div>{'ID поста ' + id}</div>
-      <div>{'ID автора ' + authorId}</div>
-      <div>{'Дата создания: ' + createdAt}</div>
-      <hr />
+      <div>{createdAt.toLocaleString()}</div>
       <h3>Комментарии</h3>
       <CommentList postId={id} />
-      <hr />
     </div>
   );
 }

@@ -4,4 +4,7 @@ export interface PostProps {
   content: string;
   authorId: number;
   createdAt: Date;
+  authorDisplayName: string;
+  authorUsername: string;
+  authorCreatedAt: Date;
 }
