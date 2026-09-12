@@ -7,6 +7,8 @@ from src.posts.models import Post
 from src.posts.repository import PostRepository
 from src.posts.schemas import PostCreate
 
+from src.users.models import User
+
 from src.core.exceptions import WrongUserError
 
 
@@ -39,6 +41,13 @@ class PostService:
     ) -> Post | None:
 
         return await self.repository.get_by_id(post_id)
+    
+    async def get_post_with_author(
+        self,
+        post_id: int,
+    ) -> tuple[Post, User] | None:
+
+        return await self.repository.get_by_id_with_author(post_id)
 
     async def get_post_or_raise(
         self,
@@ -51,6 +60,18 @@ class PostService:
             raise PostNotFoundError()
 
         return post
+    
+    async def get_post_with_author_or_raise(
+        self,
+        post_id: int,
+    ) -> tuple[Post, User]:
+
+        result = await self.repository.get_by_id_with_author(post_id)
+
+        if result is None:
+            raise PostNotFoundError()
+        
+        return result
 
     async def get_posts(
         self,
@@ -66,19 +87,18 @@ class PostService:
             before_id,
         )
     
-    async def get_posts_between(
+    async def get_posts_with_author(
         self,
-        first_timestamp: datetime,
-        first_id: int,
-        last_timestamp: datetime,
-        last_id: int,
-    ) -> list[Post] | None:
+        before_timestamp: datetime | None,
+        before_id: int | None,
+    ) -> list[tuple[Post, User]] | None:
         
-        return await self.repository.get_portion_between(
-            first_timestamp,
-            first_id,
-            last_timestamp,
-            last_id,
+        if before_timestamp is None:
+            return await self.repository.get_latest_with_author()
+
+        return await self.repository.get_before_with_author(
+            before_timestamp,
+            before_id,
         )
 
     async def delete_post(

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
+from src.users.schemas import UserResponse
 
 
 class PostCreate(BaseModel):
@@ -14,5 +15,9 @@ class PostResponse(BaseModel):
     id: int
     title: str
     content: str
-    author_id: int
     created_at: datetime
+
+
+class PostWithAuthorResponse(BaseModel):
+    post: PostResponse
+    author: UserResponse

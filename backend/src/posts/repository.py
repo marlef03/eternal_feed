@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.posts.models import Post
 
+from src.users.models import User
+
 from src.core.config import settings
 
 
@@ -16,6 +18,15 @@ class PostRepository:
         result = await self.session.execute(select(Post).where(Post.id == post_id))
 
         return result.scalar_one_or_none()
+    
+    async def get_by_id_with_author(self, post_id: int) -> tuple[Post, User] | None:
+        result = await self.session.execute(
+            select(Post, User)
+            .join(Post.author)
+            .where(Post.id == post_id)
+        )
+
+        return result.tuples().one_or_none()
 
     async def get_before(
         self,
@@ -36,6 +47,27 @@ class PostRepository:
         )
 
         return result.scalars().all()
+    
+    async def get_before_with_author(
+        self,
+        timestamp: datetime,
+        id: int,
+    ) -> list[tuple[Post, User]] | None:
+        
+        result = await self.session.execute(
+            select(Post, User)
+            .join(Post.author)
+            .where(
+                or_(
+                    Post.created_at < timestamp,
+                    and_(Post.created_at == timestamp, Post.id < id),
+                )
+            )
+            .order_by(Post.created_at.desc(), Post.id.desc())
+            .limit(settings.posts_per_update)
+        )
+
+        return result.tuples().all()
 
     async def get_latest(self) -> list[Post] | None:
         result = await self.session.execute(
@@ -45,6 +77,16 @@ class PostRepository:
         )
 
         return result.scalars().all()
+    
+    async def get_latest_with_author(self) -> list[tuple[Post, User]] | None:
+        result = await self.session.execute(
+            select(Post, User)
+            .join(Post.author)
+            .order_by(Post.created_at.desc(), Post.id.desc())
+            .limit(settings.posts_preload)
+        )
+
+        return result.tuples().all()
 
     async def create(
         self,

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, status
 
-from src.posts.schemas import PostCreate, PostResponse
+from src.posts.schemas import PostCreate, PostResponse, PostWithAuthorResponse
 from src.posts.service import PostService
 from src.posts.dependencies import get_post_service
 
@@ -32,28 +32,32 @@ async def create_post(
 
 @router.get(
     "",
-    response_model=list[PostResponse],
+    response_model=list[PostWithAuthorResponse],
 )
 async def get_posts(
     before_timestamp: datetime | None = None,
     before_id: int | None = None,
     service: PostService = Depends(get_post_service),
 ):
-    return await service.get_posts(
+    result = await service.get_posts_with_author(
         before_timestamp,
         before_id,
     )
 
+    return [{"post": post, "author": author} for post, author in result]
+
 
 @router.get(
     "/{post_id}",
-    response_model=PostResponse,
+    response_model=PostWithAuthorResponse,
 )
 async def get_post(
     post_id: int,
     service: PostService = Depends(get_post_service),
 ):
-    return await service.get_post_or_raise(post_id)
+    post, author = await service.get_post_with_author_or_raise(post_id)
+
+    return {"post": post, "author": author}
 
 
 @router.delete(
