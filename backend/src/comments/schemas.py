@@ -18,7 +18,11 @@ class CommentResponse(BaseModel):
 
 
 class CommentWithAuthorResponse(BaseModel):
-    comment: CommentResponse
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    content: str
+    created_at: datetime
     author: UserPublicResponse
 
 

@@ -58,14 +58,14 @@ class CommentService:
     async def get_comment_with_author(
         self,
         comment_id: int,
-    ) -> tuple[Comment, User] | None:
+    ) -> Comment | None:
 
         return await self.repository.get_by_id_with_author(comment_id)
 
     async def get_comment_with_author_or_raise(
         self,
         comment_id: int,
-    ) -> tuple[Comment, User]:
+    ) -> Comment:
 
         result = await self.repository.get_by_id_with_author(comment_id)
 
@@ -95,7 +95,7 @@ class CommentService:
         post_id: int,
         before_timestamp: datetime | None,
         before_id: int | None,
-    ) -> tuple[list[tuple[Comment, User]] | None, bool]:
+    ) -> tuple[list[Comment] | None, bool]:
 
         if before_timestamp is None:
             return await self.repository.get_latest_with_author(post_id)

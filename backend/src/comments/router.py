@@ -50,8 +50,6 @@ async def get_comments(
         before_id,
     )
 
-    comments = [{"comment": comment, "author": author} for comment, author in comments]
-
     return CommentsResponse(
         items=comments,
         has_more=has_more,
@@ -66,9 +64,7 @@ async def get_comment(
     comment_id: int,
     service: CommentService = Depends(get_comment_service),
 ):
-    comment, author = await service.get_comment_with_author_or_raise(comment_id)
-
-    return {"comment": comment, "author": author}
+    return await service.get_comment_with_author_or_raise(comment_id)
 
 
 @router.delete(

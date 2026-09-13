@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import select, or_, and_
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.comments.models import Comment
@@ -21,14 +22,17 @@ class CommentRepository:
 
         return result.scalar_one_or_none()
     
-    async def get_by_id_with_author(self, comment_id: int) -> tuple[Comment, User] | None:
+    async def get_by_id_with_author(self, comment_id: int) -> Comment | None:
         result = await self.session.execute(
-            select(Comment, User)
+            select(Comment)
             .join(Comment.author)
             .where(Comment.id == comment_id)
+            .options(
+                contains_eager(Comment.author)
+            )
         )
 
-        return result.tuples().one_or_none()
+        return result.scalar_one_or_none()
 
     async def get_before(
         self,
@@ -63,10 +67,10 @@ class CommentRepository:
         post_id: int,
         timestamp: datetime,
         id: int,
-    ) -> tuple[list[tuple[Comment, User]] | None, bool]:
+    ) -> tuple[list[Comment] | None, bool]:
         
         result = await self.session.execute(
-            select(Comment, User)
+            select(Comment)
             .join(Comment.author)
             .where(Comment.post_id == post_id)
             .where(
@@ -77,9 +81,12 @@ class CommentRepository:
             )
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_per_update + 1)
+            .options(
+                contains_eager(Comment.author)
+            )
         )
 
-        data = result.tuples().all()
+        data = result.scalars().all()
         has_more = False
 
         if len(data) == settings.comments_per_update + 1:
@@ -109,16 +116,19 @@ class CommentRepository:
     async def get_latest_with_author(
         self,
         post_id: int,
-    ) -> tuple[list[tuple[Comment, User]] | None, bool]:
+    ) -> tuple[list[Comment] | None, bool]:
         result = await self.session.execute(
-            select(Comment, User)
+            select(Comment)
             .join(Comment.author)
             .where(Comment.post_id == post_id)
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_preloaded + 1)
+            .options(
+                contains_eager(Comment.author)
+            )
         )
 
-        data = result.tuples().all()
+        data = result.scalars().all()
         has_more = False
 
         if len(data) == settings.comments_preloaded + 1:
