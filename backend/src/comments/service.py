@@ -7,6 +7,8 @@ from src.comments.repository import CommentRepository
 from src.comments.schemas import CommentCreate
 from src.core.exceptions import CommentNotFoundError
 
+from src.users.models import User
+
 from src.core.exceptions import WrongUserError
 
 
@@ -53,6 +55,25 @@ class CommentService:
 
         return comment
     
+    async def get_comment_with_author(
+        self,
+        comment_id: int,
+    ) -> tuple[Comment, User] | None:
+
+        return await self.repository.get_by_id_with_author(comment_id)
+
+    async def get_comment_with_author_or_raise(
+        self,
+        comment_id: int,
+    ) -> tuple[Comment, User]:
+
+        result = await self.repository.get_by_id_with_author(comment_id)
+
+        if result is None:
+            raise CommentNotFoundError()
+
+        return result
+    
     async def get_post_comments(
         self,
         post_id: int,
@@ -64,6 +85,22 @@ class CommentService:
             return await self.repository.get_latest(post_id)
 
         return await self.repository.get_before(
+            post_id,
+            before_timestamp,
+            before_id
+        )
+    
+    async def get_post_comments_with_author(
+        self,
+        post_id: int,
+        before_timestamp: datetime | None,
+        before_id: int | None,
+    ) -> tuple[list[tuple[Comment, User]] | None, bool]:
+
+        if before_timestamp is None:
+            return await self.repository.get_latest_with_author(post_id)
+
+        return await self.repository.get_before_with_author(
             post_id,
             before_timestamp,
             before_id

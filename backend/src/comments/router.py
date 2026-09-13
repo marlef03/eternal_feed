@@ -2,7 +2,12 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, status
 
-from src.comments.schemas import CommentCreate, CommentResponse, CommentsResponse
+from src.comments.schemas import (
+    CommentCreate,
+    CommentResponse,
+    CommentWithAuthorResponse,
+    CommentsResponse,
+)
 from src.comments.service import CommentService
 from src.comments.dependencies import get_comment_service
 
@@ -39,11 +44,13 @@ async def get_comments(
     before_id: int | None = None,
     service: CommentService = Depends(get_comment_service),
 ):
-    comments, has_more = await service.get_post_comments(
+    comments, has_more = await service.get_post_comments_with_author(
         post_id,
         before_timestamp,
         before_id,
     )
+
+    comments = [{"comment": comment, "author": author} for comment, author in comments]
 
     return CommentsResponse(
         items=comments,
@@ -53,13 +60,15 @@ async def get_comments(
 
 @router.get(
     "/comments/{comment_id}",
-    response_model=CommentResponse,
+    response_model=CommentWithAuthorResponse,
 )
 async def get_comment(
     comment_id: int,
     service: CommentService = Depends(get_comment_service),
 ):
-    return await service.get_comment_or_raise(comment_id)
+    comment, author = await service.get_comment_with_author_or_raise(comment_id)
+
+    return {"comment": comment, "author": author}
 
 
 @router.delete(

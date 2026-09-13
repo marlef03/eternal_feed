@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from src.users.schemas import UserPublicResponse
+
 
 class CommentCreate(BaseModel):
     content: str
@@ -12,11 +14,14 @@ class CommentResponse(BaseModel):
     
     id: int
     content: str
-    author_id: int
-    post_id: int
     created_at: datetime
 
 
+class CommentWithAuthorResponse(BaseModel):
+    comment: CommentResponse
+    author: UserPublicResponse
+
+
 class CommentsResponse(BaseModel):
-    items: list[CommentResponse]
+    items: list[CommentWithAuthorResponse]
     has_more: bool
