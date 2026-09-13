@@ -45,7 +45,7 @@ class PostService:
     async def get_post_with_author(
         self,
         post_id: int,
-    ) -> tuple[Post, User] | None:
+    ) -> Post | None:
 
         return await self.repository.get_by_id_with_author(post_id)
 
@@ -64,7 +64,7 @@ class PostService:
     async def get_post_with_author_or_raise(
         self,
         post_id: int,
-    ) -> tuple[Post, User]:
+    ) -> Post:
 
         result = await self.repository.get_by_id_with_author(post_id)
 
@@ -91,7 +91,7 @@ class PostService:
         self,
         before_timestamp: datetime | None,
         before_id: int | None,
-    ) -> list[tuple[Post, User]] | None:
+    ) -> list[Post] | None:
         
         if before_timestamp is None:
             return await self.repository.get_latest_with_author()

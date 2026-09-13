@@ -44,7 +44,7 @@ async def get_posts(
         before_id,
     )
 
-    return [{"post": post, "author": author} for post, author in result]
+    return result
 
 
 @router.get(
@@ -55,9 +55,7 @@ async def get_post(
     post_id: int,
     service: PostService = Depends(get_post_service),
 ):
-    post, author = await service.get_post_with_author_or_raise(post_id)
-
-    return {"post": post, "author": author}
+    return await service.get_post_with_author_or_raise(post_id)
 
 
 @router.delete(

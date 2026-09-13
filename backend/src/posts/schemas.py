@@ -20,5 +20,10 @@ class PostResponse(BaseModel):
 
 
 class PostWithAuthorResponse(BaseModel):
-    post: PostResponse
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    title: str
+    content: str
+    created_at: datetime
     author: UserPublicResponse

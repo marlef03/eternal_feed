@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import select, or_, and_
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.posts.models import Post
@@ -19,14 +20,17 @@ class PostRepository:
 
         return result.scalar_one_or_none()
     
-    async def get_by_id_with_author(self, post_id: int) -> tuple[Post, User] | None:
+    async def get_by_id_with_author(self, post_id: int) -> Post | None:
         result = await self.session.execute(
             select(Post, User)
             .join(Post.author)
             .where(Post.id == post_id)
+            .options(
+                contains_eager(Post.author)
+            )
         )
 
-        return result.tuples().one_or_none()
+        return result.scalar_one_or_none()
 
     async def get_before(
         self,
@@ -52,10 +56,10 @@ class PostRepository:
         self,
         timestamp: datetime,
         id: int,
-    ) -> list[tuple[Post, User]] | None:
+    ) -> list[Post] | None:
         
         result = await self.session.execute(
-            select(Post, User)
+            select(Post)
             .join(Post.author)
             .where(
                 or_(
@@ -65,9 +69,12 @@ class PostRepository:
             )
             .order_by(Post.created_at.desc(), Post.id.desc())
             .limit(settings.posts_per_update)
+            .options(
+                contains_eager(Post.author)
+            )
         )
 
-        return result.tuples().all()
+        return result.scalars().all()
 
     async def get_latest(self) -> list[Post] | None:
         result = await self.session.execute(
@@ -78,15 +85,18 @@ class PostRepository:
 
         return result.scalars().all()
     
-    async def get_latest_with_author(self) -> list[tuple[Post, User]] | None:
+    async def get_latest_with_author(self) -> list[Post] | None:
         result = await self.session.execute(
-            select(Post, User)
+            select(Post)
             .join(Post.author)
             .order_by(Post.created_at.desc(), Post.id.desc())
             .limit(settings.posts_preload)
+            .options(
+                contains_eager(Post.author)
+            )
         )
 
-        return result.tuples().all()
+        return result.scalars().all()
 
     async def create(
         self,
