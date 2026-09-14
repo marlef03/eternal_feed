@@ -3,16 +3,19 @@ import type { CommentProps } from '../interfaces/CommentProps';
 function Comment({
   id,
   content,
-  postId,
-  authorId,
   createdAt,
+  authorId,
+  authorDisplayName,
+  authorUsername,
+  authorCreatedAt,
 }: CommentProps) {
   return (
     <div>
-      <div>{'ID комментария: ' + id}</div>
-      <div>{'ID пользователя ' + authorId}</div>
-      <div>{'Дата создания: ' + createdAt}</div>
+      <div>{authorDisplayName}</div>
+      <div>{'@' + authorUsername}</div>
+      <div>{authorCreatedAt.toLocaleString()}</div>
       <p>{content}</p>
+      <div>{createdAt.toLocaleString()}</div>
     </div>
   );
 }

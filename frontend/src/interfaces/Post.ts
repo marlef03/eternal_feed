@@ -1,16 +1,13 @@
+import type { CommentResponse, CommentData } from './Comment';
+import type { AuthorResponse, AuthorData } from './User';
+
 export interface PostResponse {
-  post: {
-    id: number;
-    title: string;
-    content: string;
-    created_at: string;
-  };
-  author: {
-    id: number;
-    display_name: string;
-    username: string;
-    created_at: string;
-  }
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
+  author: AuthorResponse;
+  comments: CommentResponse;
 }
 
 export interface PostData {
@@ -18,10 +15,6 @@ export interface PostData {
   title: string;
   content: string;
   createdAt: Date;
-  author: {
-    id: number;
-    displayName: string;
-    username: string;
-    createdAt: Date;
-  };
+  author: AuthorData;
+  comments: CommentData;
 }

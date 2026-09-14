@@ -5,7 +5,7 @@ import ScrollObserver from './ScrollObserver';
 import Post from './Post';
 import type { PostResponse, PostData } from '../interfaces/Post';
 
-async function fetchPosts({ pageParam }) {
+async function fetchPosts({ pageParam }): Promise<PostData[]> {
   let data: PostResponse[];
   if (pageParam.beforeTimestamp) {
     data = (await apiClient.get(`/posts?before_timestamp=${pageParam.beforeTimestamp}&before_id=${pageParam.beforeId}`)).data;
@@ -15,16 +15,30 @@ async function fetchPosts({ pageParam }) {
 
   return data.map(
     (item) => ({
-      id: item.post.id,
-      title: item.post.title,
-      content: item.post.content,
-      createdAt: new Date(item.post.created_at),
+      id: item.id,
+      title: item.title,
+      content: item.content,
+      createdAt: new Date(item.created_at),
       author: {
         id: item.author.id,
         displayName: item.author.display_name,
         username: item.author.username,
         createdAt: new Date(item.author.created_at),
       },
+      comments: {
+        items: item.comments.items.map((comment) => ({
+          id: comment.id,
+          content: comment.content,
+          createdAt: new Date(comment.created_at),
+          author: {
+            id: comment.author.id,
+            displayName: comment.author.display_name,
+            username: comment.author.username,
+            createdAt: new Date(comment.author.created_at),
+          },
+        })),
+        hasMore: item.comments.has_more,
+      }
     })
   );
 }
@@ -76,6 +90,7 @@ function PostList() {
           authorDisplayName={post.author.displayName}
           authorUsername={post.author.username}
           authorCreatedAt={post.author.createdAt}
+          comments={post.comments}
         />
       )
     ))

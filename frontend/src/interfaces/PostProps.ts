@@ -1,3 +1,5 @@
+import type { CommentData } from './Comment';
+
 export interface PostProps {
   id: number;
   title: string;
@@ -7,4 +9,5 @@ export interface PostProps {
   authorDisplayName: string;
   authorUsername: string;
   authorCreatedAt: Date;
+  comments: CommentData;
 }

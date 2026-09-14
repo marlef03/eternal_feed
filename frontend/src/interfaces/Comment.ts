@@ -1,10 +1,11 @@
+import type { AuthorResponse, AuthorData } from './User';
+
 export interface CommentResponse {
   items: {
     id: number;
     content: string;
-    post_id: number;
-    author_id: number;
     created_at: string;
+    author: AuthorResponse;
   }[];
   has_more: boolean;
 }
@@ -13,9 +14,8 @@ export interface CommentData {
   items: {
     id: number;
     content: string;
-    postId: number;
-    authorId: number;
     createdAt: Date;
+    author: AuthorData;
   }[];
   hasMore: boolean;
 }

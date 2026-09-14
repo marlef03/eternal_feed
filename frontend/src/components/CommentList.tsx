@@ -8,7 +8,7 @@ import type { CommentListProps } from '../interfaces/CommentListProps';
 async function fetchComments({
   pageParam,
   queryKey,
-}) {
+}): Promise<CommentData> {
   let data: CommentResponse;
   if (pageParam.beforeTimestamp) {
     data = (await apiClient.get(`/posts/${queryKey[1]}/comments?before_timestamp=${pageParam.beforeTimestamp}&before_id=${pageParam.beforeId}`)).data;
@@ -21,72 +21,93 @@ async function fetchComments({
       (item) => ({
         id: item.id,
         content: item.content,
-        postId: item.post_id,
-        authorId: item.author_id,
         createdAt: new Date(item.created_at),
+        author: {
+          id: item.author.id,
+          displayName: item.author.display_name,
+          username: item.author.username,
+          createdAt: new Date(item.author.created_at),
+        }
       })
     ),
     hasMore: data.has_more,
   };
 }
 
-function CommentList({ postId }: CommentListProps) {
+function CommentList({
+  postId,
+  preloadedComments,
+}: CommentListProps) {
   const {
     data,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
+    isFetching,
+    isFetched,
     status,
   } = useInfiniteQuery<CommentData>({
     queryKey: ['comments', postId],
     queryFn: fetchComments,
     initialPageParam: {
-      beforeTimestamp: undefined,
-      beforeId: undefined,
+      beforeTimestamp: preloadedComments.items.at(-1)?.createdAt.toISOString(),
+      beforeId: preloadedComments.items.at(-1)?.id,
     },
     getNextPageParam: (lastPage) => {
-      if (!lastPage.hasMore) return undefined;
+      if (!preloadedComments.hasMore || !lastPage.hasMore) return undefined;
 
       return {
         beforeTimestamp: lastPage.items.at(-1)?.createdAt.toISOString(),
         beforeId: lastPage.items.at(-1)?.id,
       };
-    }
+    },
+    enabled: false,
   });
-
-  if (status == 'pending') {
-    return <div>Загрузка...</div>
-  }
 
   if (status == 'error') {
     return <div>Ошибка загрузки</div>
   }
 
-  const comments: ReactElement[] = []
+  const comments: ReactElement[] = preloadedComments.items.map(
+    (comment) => (
+      <Comment
+        key={comment.id}
+        id={comment.id}
+        content={comment.content}
+        createdAt={comment.createdAt}
+        authorId={comment.author.id}
+        authorDisplayName={comment.author.displayName}
+        authorUsername={comment.author.username}
+        authorCreatedAt={comment.author.createdAt}
+      />
+  ))
 
-  data.pages.forEach((page) => {
-    comments.push(...page.items.map(
-      (comment) => (
-        <Comment
-          key={comment.id}
-          id={comment.id}
-          content={comment.content}
-          authorId={comment.authorId}
-          postId={comment.postId}
-          createdAt={comment.createdAt}
-        />
-      )
-    ))
-  });
+  if (data) {
+    data.pages.forEach((page) => {
+      comments.push(...page.items.map(
+        (comment) => (
+          <Comment
+            key={comment.id}
+            id={comment.id}
+            content={comment.content}
+            createdAt={comment.createdAt}
+            authorId={comment.author.id}
+            authorDisplayName={comment.author.displayName}
+            authorUsername={comment.author.username}
+            authorCreatedAt={comment.author.createdAt}
+          />
+        )
+      ))
+    });
+  }
   
   return (
     <div>
       {comments}
       {
-        isFetchingNextPage && <div>Загрузка...</div>
+        isFetching && <div>Загрузка...</div>
       }
       {
-        hasNextPage && !isFetchingNextPage &&
+        ((!isFetched && preloadedComments.hasMore) || (hasNextPage && !isFetching)) &&
         <button
           onClick={() => fetchNextPage()}
         >
