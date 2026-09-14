@@ -52,7 +52,7 @@ class Post(Base):
         back_populates="posts",
     )
 
-    comments: Mapped[Comment] = relationship(
+    comments: Mapped[list[Comment]] = relationship(
         back_populates="post",
         cascade="all, delete-orphan",
     )
