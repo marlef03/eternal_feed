@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import select, or_, and_
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.comments.models import Comment
@@ -25,7 +25,7 @@ class CommentRepository:
             select(Comment)
             .where(Comment.id == comment_id)
             .options(
-                selectinload(Comment.author)
+                joinedload(Comment.author)
             )
         )
 
@@ -78,7 +78,7 @@ class CommentRepository:
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_per_update + 1)
             .options(
-                selectinload(Comment.author)
+                joinedload(Comment.author)
             )
         )
 
@@ -119,7 +119,7 @@ class CommentRepository:
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_preloaded + 1)
             .options(
-                selectinload(Comment.author)
+                joinedload(Comment.author)
             )
         )
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import select, or_, and_, true
-from sqlalchemy.orm import contains_eager, aliased, selectinload
+from sqlalchemy.orm import contains_eager, aliased, joinedload, selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.posts.models import Post
@@ -25,7 +25,7 @@ class PostRepository:
             select(Post)
             .where(Post.id == post_id)
             .options(
-                selectinload(Post.author)
+                joinedload(Post.author)
             )
         )
 
@@ -68,7 +68,7 @@ class PostRepository:
             .order_by(Post.created_at.desc(), Post.id.desc())
             .limit(settings.posts_per_update)
             .options(
-                selectinload(Post.author),
+                joinedload(Post.author),
             )
         )
 
@@ -130,11 +130,10 @@ class PostRepository:
     async def get_latest_with_author(self) -> list[Post] | None:
         result = await self.session.execute(
             select(Post)
-            .join(Post.author)
             .order_by(Post.created_at.desc(), Post.id.desc())
             .limit(settings.posts_preload)
             .options(
-                contains_eager(Post.author)
+                joinedload(Post.author)
             )
         )
 
