@@ -1,12 +1,10 @@
 from datetime import datetime
 
 from sqlalchemy import select, or_, and_
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.comments.models import Comment
-
-from src.users.models import User
 
 from src.core.config import settings
 
@@ -25,10 +23,9 @@ class CommentRepository:
     async def get_by_id_with_author(self, comment_id: int) -> Comment | None:
         result = await self.session.execute(
             select(Comment)
-            .join(Comment.author)
             .where(Comment.id == comment_id)
             .options(
-                contains_eager(Comment.author)
+                selectinload(Comment.author)
             )
         )
 
@@ -71,7 +68,6 @@ class CommentRepository:
         
         result = await self.session.execute(
             select(Comment)
-            .join(Comment.author)
             .where(Comment.post_id == post_id)
             .where(
                 or_(
@@ -82,7 +78,7 @@ class CommentRepository:
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_per_update + 1)
             .options(
-                contains_eager(Comment.author)
+                selectinload(Comment.author)
             )
         )
 
@@ -119,12 +115,11 @@ class CommentRepository:
     ) -> tuple[list[Comment] | None, bool]:
         result = await self.session.execute(
             select(Comment)
-            .join(Comment.author)
             .where(Comment.post_id == post_id)
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(settings.comments_preloaded + 1)
             .options(
-                contains_eager(Comment.author)
+                selectinload(Comment.author)
             )
         )
 
