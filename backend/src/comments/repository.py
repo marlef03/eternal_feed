@@ -6,8 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.comments.models import Comment
 
-from src.core.config import settings
-
 
 class CommentRepository:
     def __init__(self, session: AsyncSession):
@@ -36,7 +34,8 @@ class CommentRepository:
         post_id: int,
         timestamp: datetime,
         id: int,
-    ) -> tuple[list[Comment] | None, bool]:
+        limit: int,
+    ) -> list[Comment] | None:
         
         result = await self.session.execute(
             select(Comment)
@@ -48,23 +47,18 @@ class CommentRepository:
                 )
             )
             .order_by(Comment.created_at.desc(), Comment.id.desc())
-            .limit(settings.comments_per_update + 1)
+            .limit(limit)
         )
 
-        data = result.scalars().all()
-        has_more = False
-
-        if len(data) == settings.comments_per_update + 1:
-            has_more = True
-
-        return (data[:-1] if has_more else data), has_more
+        return result.scalars().all()
     
     async def get_before_with_author(
         self,
         post_id: int,
         timestamp: datetime,
         id: int,
-    ) -> tuple[list[Comment] | None, bool]:
+        limit: int,
+    ) -> list[Comment] | None:
         
         result = await self.session.execute(
             select(Comment)
@@ -76,60 +70,44 @@ class CommentRepository:
                 )
             )
             .order_by(Comment.created_at.desc(), Comment.id.desc())
-            .limit(settings.comments_per_update + 1)
+            .limit(limit)
             .options(
                 joinedload(Comment.author)
             )
         )
 
-        data = result.scalars().all()
-        has_more = False
-
-        if len(data) == settings.comments_per_update + 1:
-            has_more = True
-
-        return (data[:-1] if has_more else data), has_more
+        return result.scalars().all()
     
     async def get_latest(
         self,
         post_id: int,
-    ) -> tuple[list[Comment] | None, bool]:
+        limit: int,
+    ) -> list[Comment] | None:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.post_id == post_id)
             .order_by(Comment.created_at.desc(), Comment.id.desc())
-            .limit(settings.comments_preloaded + 1)
+            .limit(limit)
         )
 
-        data = result.scalars().all()
-        has_more = False
-
-        if len(data) == settings.comments_preloaded + 1:
-            has_more = True
-
-        return (data[:-1] if has_more else data), has_more
+        return result.scalars().all()
     
     async def get_latest_with_author(
         self,
         post_id: int,
-    ) -> tuple[list[Comment] | None, bool]:
+        limit: int,
+    ) -> list[Comment] | None:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.post_id == post_id)
             .order_by(Comment.created_at.desc(), Comment.id.desc())
-            .limit(settings.comments_preloaded + 1)
+            .limit(limit)
             .options(
                 joinedload(Comment.author)
             )
         )
 
-        data = result.scalars().all()
-        has_more = False
-
-        if len(data) == settings.comments_preloaded + 1:
-            has_more = True
-
-        return (data[:-1] if has_more else data), has_more
+        return result.scalars().all()
 
     async def create(
         self,

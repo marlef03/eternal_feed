@@ -7,7 +7,7 @@ from src.comments.repository import CommentRepository
 from src.comments.schemas import CommentCreate
 from src.core.exceptions import CommentNotFoundError
 
-from src.users.models import User
+from src.core.config import settings
 
 from src.core.exceptions import WrongUserError
 
@@ -82,13 +82,18 @@ class CommentService:
     ) -> tuple[list[Comment] | None, bool]:
 
         if before_timestamp is None:
-            return await self.repository.get_latest(post_id)
+            limit = settings.comments_preloaded
+            result = await self.repository.get_latest(post_id, limit + 1)
+        else:
+            limit = settings.comments_per_update
+            result = await self.repository.get_before(
+                post_id,
+                before_timestamp,
+                before_id,
+                limit + 1,
+            )
 
-        return await self.repository.get_before(
-            post_id,
-            before_timestamp,
-            before_id
-        )
+        return result[:limit], len(result) > limit
     
     async def get_post_comments_with_author(
         self,
@@ -98,13 +103,18 @@ class CommentService:
     ) -> tuple[list[Comment] | None, bool]:
 
         if before_timestamp is None:
-            return await self.repository.get_latest_with_author(post_id)
+            limit = settings.comments_preloaded
+            result = await self.repository.get_latest_with_author(post_id, limit + 1)
+        else:
+            limit = settings.comments_per_update
+            result = await self.repository.get_before_with_author(
+                post_id,
+                before_timestamp,
+                before_id,
+                limit + 1,
+            )
 
-        return await self.repository.get_before_with_author(
-            post_id,
-            before_timestamp,
-            before_id
-        )
+        return result[:limit], len(result) > limit
 
     async def delete_comment(
         self,
