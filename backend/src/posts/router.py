@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, status
 
-from src.posts.schemas import PostCreate, PostResponse, PostWithAuthorResponse
+from src.posts.schemas import PostCreate, PostResponse, PostWithAuthorResponse, PostWithCommentsResponse
 from src.posts.service import PostService
 from src.posts.dependencies import get_post_service
 
@@ -32,17 +32,19 @@ async def create_post(
 
 @router.get(
     "",
-    response_model=list[PostWithAuthorResponse],
+    response_model=list[PostWithCommentsResponse],
 )
 async def get_posts(
     before_timestamp: datetime | None = None,
     before_id: int | None = None,
     service: PostService = Depends(get_post_service),
 ):
-    result = await service.get_posts_with_author(
+    result = await service.get_posts_with_comments(
         before_timestamp,
         before_id,
     )
+
+    
 
     return result
 

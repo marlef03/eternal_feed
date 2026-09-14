@@ -7,7 +7,7 @@ from src.posts.models import Post
 from src.posts.repository import PostRepository
 from src.posts.schemas import PostCreate
 
-from src.users.models import User
+from src.core.config import settings
 
 from src.core.exceptions import WrongUserError
 
@@ -97,6 +97,20 @@ class PostService:
             return await self.repository.get_latest_with_author()
 
         return await self.repository.get_before_with_author(
+            before_timestamp,
+            before_id,
+        )
+    
+    async def get_posts_with_comments(
+        self,
+        before_timestamp: datetime | None,
+        before_id: int | None,
+    ) -> list[Post] | None:
+        
+        if before_timestamp is None:
+            return await self.repository.get_latest_with_comments()
+        
+        return await self.repository.get_before_with_comments(
             before_timestamp,
             before_id,
         )
