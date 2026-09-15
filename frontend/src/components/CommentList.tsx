@@ -9,12 +9,8 @@ async function fetchComments({
   pageParam,
   queryKey,
 }): Promise<CommentData> {
-  let data: CommentResponse;
-  if (pageParam.beforeTimestamp) {
-    data = (await apiClient.get(`/posts/${queryKey[1]}/comments?before_timestamp=${pageParam.beforeTimestamp}&before_id=${pageParam.beforeId}`)).data;
-  } else {
-    data = (await apiClient.get(`/posts/${queryKey[1]}/comments`)).data;
-  }
+  const data: CommentResponse = 
+    (await apiClient.get(`/posts/${queryKey[1]}/comments?before_timestamp=${pageParam.beforeTimestamp}&before_id=${pageParam.beforeId}`)).data;
 
   return {
     items: data.items.map(
@@ -63,8 +59,18 @@ function CommentList({
     enabled: false,
   });
 
-  if (status == 'error') {
-    return <div>Ошибка загрузки</div>
+  if (preloadedComments.items.length == 0) {
+    return <div
+      className="
+        text-center
+        p-1
+        rounded-xl
+        bg-mist-100
+        dark:bg-mist-800
+      "
+    >
+      Без комментариев
+    </div>;
   }
 
   const comments: ReactElement[] = preloadedComments.items.map(
@@ -102,14 +108,37 @@ function CommentList({
   
   return (
     <div>
-      {comments}
+      <div>
+        {comments}
+      </div>
       {
-        isFetching && <div>Загрузка...</div>
+        isFetching &&
+        <div
+          className="text-center bg-mist-100 dark:bg-mist-800 rounded-xl p-1 not-first:mt-2"
+        >Загрузка...</div>
       }
       {
-        ((!isFetched && preloadedComments.hasMore) || (hasNextPage && !isFetching)) &&
+        status == 'error' &&
+        <div
+          className="text-center bg-mist-100 dark:bg-mist-800 rounded-xl p-1 not-first:mt-2"
+        >Ошибка загрузки</div>
+      }
+      {
+        (status == 'error' || (!isFetched && preloadedComments.hasMore) || (hasNextPage && !isFetching)) &&
         <button
           onClick={() => fetchNextPage()}
+          className="
+            w-full
+            text-center
+            mt-2 p-1
+            rounded-xl
+            bg-mist-100
+            dark:bg-mist-800
+            hover:cursor-pointer
+            hover:bg-mist-50
+            hover:dark:bg-mist-900
+            transition-colors
+          "
         >
           Показать ещё
         </button>

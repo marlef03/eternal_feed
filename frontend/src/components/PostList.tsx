@@ -97,7 +97,9 @@ function PostList() {
   });
 
   return (
-    <div>
+    <div
+      className="w-2xl"
+    >
       {posts}
       {
         isFetchingNextPage && <div>Загрузка...</div>

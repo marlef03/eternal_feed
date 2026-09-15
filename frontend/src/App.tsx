@@ -16,7 +16,11 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <PostList />
+      <div
+        className="flex justify-center"
+      >
+        <PostList />
+      </div>
     </QueryClientProvider>
   );
 }
