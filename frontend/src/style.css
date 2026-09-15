@@ -4,10 +4,4 @@
     body {
         @apply ml-1 mr-1 bg-mist-50 dark:bg-mist-900 text-black dark:text-white;
     }
-    h1 {
-        @apply text-lg
-    }
-    h2 {
-        @apply text-xl
-    }
 }
