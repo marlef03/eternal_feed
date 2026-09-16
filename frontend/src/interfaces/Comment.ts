@@ -10,6 +10,10 @@ export interface CommentResponse {
   has_more: boolean;
 }
 
+export interface CommentCreate {
+  content: string;
+}
+
 export interface CommentData {
   items: {
     id: number;
