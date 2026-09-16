@@ -1,5 +1,6 @@
+import React from 'react';
 import { type ReactElement } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../util/apiClient';
 import ScrollObserver from './ScrollObserver';
 import Post from './Post';
@@ -44,12 +45,13 @@ async function fetchPosts({ pageParam }): Promise<PostData[]> {
 }
 
 function PostList() {
+  const queryClient = useQueryClient();
+
   const {
     data,
     fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    status,
+    isFetching,
+    isError,
   } = useInfiniteQuery<PostData[]>({
     queryKey: ['posts'],
     queryFn: fetchPosts,
@@ -67,44 +69,51 @@ function PostList() {
     }
   });
 
-  if (status == 'pending') {
-    return <div>Загрузка...</div>
-  }
-
-  if (status == 'error') {
-    return <div>Ошибка загрузки</div>
-  }
-
   const posts: ReactElement[] = [];
 
-  data.pages.forEach((page) => {
-    posts.push(...page.map(
-      (post) => (
-        <Post
-          key={post.id}
-          id={post.id}
-          title={post.title}
-          content={post.content}
-          createdAt={post.createdAt}
-          authorId={post.author.id}
-          authorDisplayName={post.author.displayName}
-          authorUsername={post.author.username}
-          authorCreatedAt={post.author.createdAt}
-          comments={post.comments}
-        />
-      )
-    ))
-  });
+  if (data) {
+    data.pages.forEach((page) => {
+      posts.push(...page.map(
+        (post) => (
+          <Post
+            key={post.id}
+            id={post.id}
+            title={post.title}
+            content={post.content}
+            createdAt={post.createdAt}
+            authorId={post.author.id}
+            authorDisplayName={post.author.displayName}
+            authorUsername={post.author.username}
+            authorCreatedAt={post.author.createdAt}
+            comments={post.comments}
+          />
+        )
+      ))
+    });
+  }
+
+  React.useEffect(() => {
+    return () => {
+      queryClient.removeQueries({ queryKey: ['posts'] });
+    }
+  }, [queryClient]);
 
   return (
-    <div
-      className="w-2xl"
-    >
+    <div>
       {posts}
       {
-        isFetchingNextPage && <div>Загрузка...</div>
+        isFetching &&
+        <div
+          className="text-center bg-mist-100 dark:bg-mist-800 rounded-xl p-1 not-first:mt-2"
+        >Загрузка постов...</div>
       }
-      <ScrollObserver handler={!isFetchingNextPage && hasNextPage ? fetchNextPage : undefined} />
+      {
+        isError &&
+        <div
+          className="text-center bg-red-200 dark:bg-red-950 rounded-xl p-1 not-first:mt-2"
+        >Ошибка загрузки постов</div>
+      }
+      <ScrollObserver handler={fetchNextPage} />
     </div>
   );
 }
