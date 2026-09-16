@@ -69,6 +69,12 @@ function PostList() {
     }
   });
 
+  React.useEffect(() => {
+    return () => {
+      queryClient.removeQueries({ queryKey: ['posts'] });
+    }
+  }, [queryClient]);
+
   const posts: ReactElement[] = [];
 
   if (data) {
@@ -91,12 +97,6 @@ function PostList() {
       ))
     });
   }
-
-  React.useEffect(() => {
-    return () => {
-      queryClient.removeQueries({ queryKey: ['posts'] });
-    }
-  }, [queryClient]);
 
   return (
     <div>
