@@ -115,13 +115,13 @@ function CommentList({
         isFetching &&
         <div
           className="text-center bg-mist-100 dark:bg-mist-800 rounded-xl p-1 not-first:mt-2"
-        >Загрузка...</div>
+        >Загрузка комментариев...</div>
       }
       {
         status == 'error' &&
         <div
           className="text-center bg-mist-100 dark:bg-mist-800 rounded-xl p-1 not-first:mt-2"
-        >Ошибка загрузки</div>
+        >Ошибка загрузки комментариев</div>
       }
       {
         (status == 'error' || (!isFetched && preloadedComments.hasMore) || (hasNextPage && !isFetching)) &&
