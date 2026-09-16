@@ -34,7 +34,7 @@ function Post({
       >
         
         <h2>{title}</h2>
-        <p>{content}</p>
+        <pre>{content}</pre>
       </div>
       <div
         className="p-1 bg-mist-200 dark:bg-mist-700 rounded-2xl"
