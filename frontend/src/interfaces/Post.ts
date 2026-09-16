@@ -10,6 +10,11 @@ export interface PostResponse {
   comments: CommentResponse;
 }
 
+export interface PostCreate {
+  title: string;
+  content: string;
+}
+
 export interface PostData {
   id: number;
   title: string;
