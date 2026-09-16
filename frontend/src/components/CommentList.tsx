@@ -1,5 +1,6 @@
+import React from 'react';
 import { type ReactElement } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../util/apiClient';
 import Comment from './Comment';
 import type { CommentResponse, CommentData } from '../interfaces/Comment';
@@ -34,6 +35,8 @@ function CommentList({
   postId,
   preloadedComments,
 }: CommentListProps) {
+  const queryClient = useQueryClient();
+
   const {
     data,
     fetchNextPage,
@@ -58,6 +61,12 @@ function CommentList({
     },
     enabled: false,
   });
+
+  React.useEffect(() => {
+      return () => {
+        queryClient.removeQueries({ queryKey: ['comments', postId] });
+      }
+    }, [queryClient, postId]);
 
   if (preloadedComments.items.length == 0) {
     return <div
