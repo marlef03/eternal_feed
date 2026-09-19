@@ -2,13 +2,10 @@ import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CommentCreate } from '../interfaces/Comment';
 import apiClient from '../util/apiClient';
+import { useAuthStatus } from '../util/authStatus';
 
 async function createComment(postId: number, newCommentData: CommentCreate) {
-  return await apiClient.post(`/posts/${postId}/comments`, newCommentData, {
-    headers: {
-      Authorization: 'Bearer ',
-    }
-  });
+  return await apiClient.post(`/posts/${postId}/comments`, newCommentData);
 }
 
 function CommentForm({
@@ -16,6 +13,8 @@ function CommentForm({
 }: {
   postId: number,
 }) {
+  const authed = useAuthStatus((state) => state.authed);
+
   const queryClient = useQueryClient();
   
   const {
@@ -35,10 +34,14 @@ function CommentForm({
     content: false,
   });
 
-  function preventFromSubmitting(event: React.KeyboardEvent) {
-    if (event.key == 'Enter' && event.target.tagName !== 'TEXTAREA') {
-      event.preventDefault()
-    }
+  if (!authed) {
+    return (
+      <div
+        className="text-center bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-1 shadow-md mb-3 mt-3"
+      >
+        Войдите, чтобы написать комментарий
+      </div>
+    );
   }
 
   async function handleSubmit(event: React.SubmitEvent) {
@@ -76,7 +79,6 @@ function CommentForm({
         Написать комментарий
       </div>
       <form
-        onKeyDown={preventFromSubmitting}
         onSubmit={handleSubmit}
       >
         {

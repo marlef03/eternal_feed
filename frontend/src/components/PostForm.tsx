@@ -2,16 +2,15 @@ import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { PostCreate } from '../interfaces/Post';
 import apiClient from '../util/apiClient';
+import { useAuthStatus } from '../util/authStatus';
 
 async function createPost(newPostData: PostCreate) {
-  return await apiClient.post('/posts', newPostData, {
-    headers: {
-      Authorization: 'Bearer ',
-    }
-  });
+  return await apiClient.post('/posts', newPostData);
 }
 
 function PostForm() {
+  const authed = useAuthStatus((state) => state.authed);
+
   const queryClient = useQueryClient();
 
   const {
@@ -32,6 +31,16 @@ function PostForm() {
     title: false,
     content: false,
   });
+
+  if (!authed) {
+    return (
+      <div
+        className="text-center bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-1 shadow-md mb-3 mt-3"
+      >
+        Войдите, чтобы написать пост
+      </div>
+    );
+  }
 
   function preventFromSubmitting(event: React.KeyboardEvent) {
     if (event.key == 'Enter' && event.target.tagName !== 'TEXTAREA') {

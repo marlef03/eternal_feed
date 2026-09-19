@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PostList from './components/PostList';
 import PostForm from './components/PostForm';
+import Profile from './components/Profile';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,6 +18,11 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <div
+        className="fixed flex w-full flex-row-reverse"
+      >
+        <Profile />
+      </div>
       <div
         className="flex flex-col items-center"
       >
