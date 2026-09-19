@@ -26,9 +26,9 @@ function Comment({
           {getDateString(createdAt)}
         </div>
       </div>
-      <p
+      <pre
         className="p-2"
-      >{content}</p>
+      >{content}</pre>
     </div>
   );
 }
