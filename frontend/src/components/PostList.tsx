@@ -1,6 +1,5 @@
-import React from 'react';
 import { type ReactElement } from 'react';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import apiClient from '../util/apiClient';
 import ScrollObserver from './ScrollObserver';
 import Post from './Post';
@@ -45,8 +44,6 @@ async function fetchPosts({ pageParam }): Promise<PostData[]> {
 }
 
 function PostList() {
-  const queryClient = useQueryClient();
-
   const {
     data,
     fetchNextPage,
@@ -68,12 +65,6 @@ function PostList() {
       };
     }
   });
-
-  React.useEffect(() => {
-    return () => {
-      queryClient.removeQueries({ queryKey: ['posts'] });
-    }
-  }, [queryClient]);
 
   const posts: ReactElement[] = [];
 
@@ -113,7 +104,10 @@ function PostList() {
           className="text-center bg-red-200 dark:bg-red-950 rounded-xl p-1 not-first:mt-2"
         >Ошибка загрузки постов</div>
       }
-      <ScrollObserver handler={fetchNextPage} />
+      {
+        !isFetching &&
+        <ScrollObserver handler={fetchNextPage} />
+      }
     </div>
   );
 }
