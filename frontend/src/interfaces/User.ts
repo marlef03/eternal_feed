@@ -27,3 +27,13 @@ export interface UserData {
   email: string;
   createdAt: Date;
 }
+
+export function userResponseToData(response: UserResponse): UserData {
+  return {
+    id: response.id,
+    displayName: response.display_name,
+    username: response.username,
+    email: response.email,
+    createdAt: new Date(response.created_at),
+  };
+}

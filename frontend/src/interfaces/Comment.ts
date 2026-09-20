@@ -23,3 +23,22 @@ export interface CommentData {
   }[];
   hasMore: boolean;
 }
+
+export function commentResponseToData(response: CommentResponse): CommentData {
+  return {
+    items: response.items.map(
+      (item) => ({
+        id: item.id,
+        content: item.content,
+        createdAt: new Date(item.created_at),
+        author: {
+          id: item.author.id,
+          displayName: item.author.display_name,
+          username: item.author.username,
+          createdAt: new Date(item.author.created_at),
+        }
+      })
+    ),
+    hasMore: response.has_more,
+  };
+}
