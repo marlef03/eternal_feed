@@ -1,11 +1,13 @@
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { PostCreate } from '../interfaces/Post';
+import type { PostCreate, PostResponse, PostData } from '../interfaces/Post';
+import { postCreateResponseToData } from '../interfaces/Post';
 import apiClient from '../util/apiClient';
 import { useAuthStatus } from '../util/authStatus';
+import type { UserData } from '../interfaces/User';
 
 async function createPost(newPostData: PostCreate) {
-  return await apiClient.post('/posts', newPostData);
+  return (await apiClient.post('/posts', newPostData)).data;
 }
 
 function PostForm() {
@@ -20,9 +22,24 @@ function PostForm() {
     isSuccess,
   } = useMutation({
     mutationFn: createPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['posts']})
-    }
+    onSuccess: (newPostResponse: PostResponse) => {
+      const authorData: UserData | undefined = queryClient.getQueryData(['user']);
+
+      if (!authorData) {
+        return; // TODO: change to refetch
+      }
+
+      const newPost = postCreateResponseToData(newPostResponse, authorData);
+
+      queryClient.setQueryData(['posts'], (old: { pageParams: unknown[], pages: PostData[][] }) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          pages: old.pages.map((page, idx) => idx == 0 ? [newPost, ...page] : page),
+        };
+      });
+    },
   });
 
   const [ title, setTitle ] = React.useState('');
