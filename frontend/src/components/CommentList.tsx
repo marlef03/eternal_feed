@@ -2,7 +2,7 @@ import { type ReactElement } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import apiClient from '../util/apiClient';
 import Comment from './Comment';
-import type { CommentResponse, CommentData } from '../interfaces/Comment';
+import { type CommentResponse, type CommentData, commentResponseToData } from '../interfaces/Comment';
 import type { CommentListProps } from '../interfaces/CommentListProps';
 import CommentForm from './CommentForm';
 
@@ -17,22 +17,7 @@ async function fetchComments({
     data = (await apiClient.get(`/posts/${queryKey[1]}/comments`)).data;
   }
 
-  return {
-    items: data.items.map(
-      (item) => ({
-        id: item.id,
-        content: item.content,
-        createdAt: new Date(item.created_at),
-        author: {
-          id: item.author.id,
-          displayName: item.author.display_name,
-          username: item.author.username,
-          createdAt: new Date(item.author.created_at),
-        }
-      })
-    ),
-    hasMore: data.has_more,
-  };
+  return commentResponseToData(data);
 }
 
 function CommentList({

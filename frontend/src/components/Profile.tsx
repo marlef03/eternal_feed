@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { UserData, UserResponse } from '../interfaces/User';
+import { userResponseToData, type UserData, type UserResponse } from '../interfaces/User';
 import apiClient from '../util/apiClient';
 import { useAuthStatus } from '../util/authStatus';
 import LoginForm from './LoginForm';
@@ -8,13 +8,7 @@ import LoginForm from './LoginForm';
 async function getUser(): Promise<UserData> {
   const data: UserResponse = (await apiClient.get(`/users/me`)).data;
 
-  return {
-    id: data.id,
-    displayName: data.display_name,
-    username: data.username,
-    email: data.email,
-    createdAt: new Date(data.created_at),
-  };
+  return userResponseToData(data);
 }
 
 function Profile() {
