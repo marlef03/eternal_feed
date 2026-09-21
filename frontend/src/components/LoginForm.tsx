@@ -56,12 +56,26 @@ function LoginForm() {
       newErrors.userLogin = 'Обязательное поле';
     }
 
-    if (userLogin.includes('@') && !isValidEmail(userLogin)) {
-      newErrors.userLogin = 'Некорректный адрес электронной почты';
+    if (userLogin.includes('@')) {
+      if (!isValidEmail(userLogin)) {
+        newErrors.userLogin = 'Некорректный адрес электронной почты';
+      }
+
+      if (userLogin.length > 255) {
+        newErrors.userLogin = 'Длина адреса электронной почты не должна превышать 255 символов';
+      }
+    }
+
+    if (!userLogin.includes('@') && userLogin.length > 50) {
+      newErrors.userLogin = 'Длина имени пользователя не должна превышать 50 символов';
     }
 
     if (password.trim() == '') {
       newErrors.password = 'Обязательное поле';
+    }
+
+    if (password.length > 100) {
+      newErrors.password = 'Длина пароля не должна превышать 100 символов';
     }
 
     setFormErrors(newErrors);
