@@ -8,6 +8,11 @@ export interface EmailLoginData {
   password: string;
 }
 
+export interface LoginFormErrors {
+  userLogin: string | null;
+  password: string | null;
+}
+
 export type LoginType = 'username' | 'email';
 
 export interface LoginParams {

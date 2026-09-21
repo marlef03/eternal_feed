@@ -1,7 +1,7 @@
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../util/apiClient';
-import type { UsernameLoginData, EmailLoginData, TokenData, LoginParams } from '../interfaces/Auth';
+import type { UsernameLoginData, EmailLoginData, TokenData, LoginParams, LoginFormErrors } from '../interfaces/Auth';
 import tokenStore from '../util/tokenStore';
 import { isValidEmail } from '../util/helperFunctions';
 
@@ -42,9 +42,9 @@ function LoginForm() {
 
   const [ userLogin, setUserLogin ] = React.useState('');
   const [ password, setPassword ] = React.useState('');
-  const [ formErrors, setFormErrors ] = React.useState({
-    userLogin: false,
-    password: false,
+  const [ formErrors, setFormErrors ] = React.useState<LoginFormErrors>({
+    userLogin: null,
+    password: null,
   });
 
   function handleSubmit(event: React.SubmitEvent) {
@@ -52,15 +52,16 @@ function LoginForm() {
 
     const newErrors = { ...formErrors };
 
-    if (
-      userLogin.trim() == '' ||
-      userLogin.includes('@') && !isValidEmail(userLogin)
-    ) {
-      newErrors.userLogin = true;
+    if (userLogin.trim() == '') {
+      newErrors.userLogin = 'Обязательное поле';
+    }
+
+    if (userLogin.includes('@') && !isValidEmail(userLogin)) {
+      newErrors.userLogin = 'Некорректный адрес электронной почты';
     }
 
     if (password.trim() == '') {
-      newErrors.password = true;
+      newErrors.password = 'Обязательное поле';
     }
 
     setFormErrors(newErrors);
@@ -90,12 +91,14 @@ function LoginForm() {
 
   function handleUserLoginChange(event: React.ChangeEvent) {
     setUserLogin(event.target.value);
-    setFormErrors((old) => ({...old, userLogin: false}));
+
+    const error = event.target.value.includes('@') && !isValidEmail(event.target.value) ? 'Некорректный адрес электронной почты' : null;
+    setFormErrors((old) => ({...old, userLogin: error}));
   }
 
   function handlePasswordChange(event: React.ChangeEvent) {
     setPassword(event.target.value);
-    setFormErrors((old) => ({...old, password: false}));
+    setFormErrors((old) => ({...old, password: null}));
   }
 
   if (isSuccess) {
@@ -128,7 +131,7 @@ function LoginForm() {
             <div
               className="text-red-800 dark:text-red-300"
             >
-              Обязательное поле
+              {formErrors.userLogin}
             </div>
           }
           <input
@@ -162,7 +165,7 @@ function LoginForm() {
             <div
               className="text-red-800 dark:text-red-300"
             >
-              Обязательное поле
+              {formErrors.password}
             </div>
           }
           <input
