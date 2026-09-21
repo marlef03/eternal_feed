@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { userResponseToData, type UserData, type UserResponse } from '../interfaces/User';
 import apiClient from '../util/apiClient';
@@ -22,7 +23,12 @@ function Profile() {
   } = useQuery<UserData>({
     queryKey: ['user'],
     queryFn: getUser,
-    retry: false,
+    retry: (failureCount, error) => {
+        if (axios.isAxiosError(error) && error?.response?.status === 401) {
+          return false;
+        }
+        return failureCount < 3;
+      },
   });
 
   return (

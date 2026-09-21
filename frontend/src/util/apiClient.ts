@@ -61,7 +61,10 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await apiClient.post("/auth/refresh", {});
+        const { data } = await axios.post("/auth/refresh", {}, {
+          baseURL: '/api/v1',
+          withCredentials: true,
+        });
 
         const newToken = data.access_token;
 
@@ -73,16 +76,15 @@ apiClient.interceptors.response.use(
 
         processQueue(null, newToken);
         return apiClient(originalRequest);
-      } catch (refreshError: unknown) {
+      } catch (refreshError) {
         if (refreshError instanceof Error) {
-          processQueue(refreshError, null);
-          
           useAuthStatus.setState({ authed: false });
 
           tokenStore.clear();
 
-          return Promise.reject(refreshError);
+          processQueue(refreshError, null);
         }
+        return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
