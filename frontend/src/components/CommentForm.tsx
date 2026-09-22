@@ -37,7 +37,7 @@ function CommentForm({
   if (!authed) {
     return (
       <div
-        className="text-center bg-mist-100 dark:bg-mist-800 rounded-2xl p-1 mb-3"
+        className="text-center bg-mist-100 dark:bg-mist-800 rounded-xl p-1 mb-3"
       >
         Войдите, чтобы написать комментарий
       </div>
