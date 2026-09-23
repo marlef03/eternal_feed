@@ -50,6 +50,20 @@ class UserService:
             raise UserNotFoundError()
 
         return user
+    
+    async def get_user_by_username(
+        self,
+        username: str,
+    ) -> User | None:
+        
+        return await self.repository.get_by_username(username)
+    
+    async def get_user_by_email(
+        self,
+        email: str,
+    ) -> User | None:
+        
+        return await self.repository.get_by_email(email)
 
     async def delete_user(
         self,
