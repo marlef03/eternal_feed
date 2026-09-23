@@ -50,3 +50,19 @@ class WrongUserError(HTTPException):
                 "command: resource belongs to different user"
             ),
         )
+
+
+class UsernameIsTakenError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=409,
+            detail="Username is taken, choose another or try to sign in",
+        )
+
+
+class EmailIsTakenError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=409,
+            detail="There is already a user with specifed email, try to sign in",
+        )
