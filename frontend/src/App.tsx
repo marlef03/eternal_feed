@@ -19,10 +19,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div
-        className="fixed flex w-full flex-row-reverse"
-      >
-        <Profile />
-      </div>
+        className="max-lg:h-10 h-0 transition-all"
+      />
       <div
         className="flex flex-col items-center"
       >
@@ -33,6 +31,7 @@ function App() {
           <PostList />
         </div>
       </div>
+      <Profile />
     </QueryClientProvider>
   );
 }
