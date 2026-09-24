@@ -34,7 +34,7 @@ class AuthService:
         if user is None or not verify_password(password, user.password_hash):
             raise InvalidCredentialsError()
 
-        return await self.__login(user.id)
+        return await self.login(user.id)
 
     async def login_via_username(
         self,
@@ -47,9 +47,9 @@ class AuthService:
         if user is None or not verify_password(password, user.password_hash):
             raise InvalidCredentialsError()
 
-        return await self.__login(user.id)
+        return await self.login(user.id)
 
-    async def __login(
+    async def login(
         self,
         user_id: int,
     ) -> tuple[str, str]:
