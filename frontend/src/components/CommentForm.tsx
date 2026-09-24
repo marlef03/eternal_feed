@@ -1,11 +1,12 @@
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CommentCreate } from '../interfaces/Comment';
+import { commentCreateResponseToData, type CommentCreate, type CommentResponse, type CommentsData } from '../interfaces/Comment';
 import apiClient from '../util/apiClient';
 import { useAuthStatus } from '../util/authStatus';
+import type { UserData } from '../interfaces/User';
 
-async function createComment(postId: number, newCommentData: CommentCreate) {
-  return await apiClient.post(`/posts/${postId}/comments`, newCommentData);
+async function createComment(postId: number, newCommentData: CommentCreate): Promise<CommentResponse> {
+  return (await apiClient.post(`/posts/${postId}/comments`, newCommentData)).data;
 }
 
 function CommentForm({
@@ -24,8 +25,23 @@ function CommentForm({
     isSuccess,
   } = useMutation({
     mutationFn: (data: CommentCreate) => createComment(postId, data),
-    onSuccess: () => {
-      queryClient.refetchQueries({queryKey: ['comments', postId]});
+    onSuccess: (newCommentResponse: CommentResponse) => {
+      const authorData: UserData | undefined = queryClient.getQueryData(['user']);
+      
+      if (!authorData) {
+        return; // TODO: change to refetch
+      }
+
+      const newComment = commentCreateResponseToData(newCommentResponse, authorData);
+
+      queryClient.setQueryData(['comments', postId], (old: { pageParams: unknown[], pages: CommentsData[] }) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          pages: old.pages.map((page, idx) => idx == 0 ? { ...page, items: [newComment, ...page.items] }: page),
+        };
+      });
     },
   });
 
@@ -65,7 +81,7 @@ function CommentForm({
   }
 
   function handleContentChange(event: React.ChangeEvent) {
-    setContent(event.target.value);
+    setContent((event.target as HTMLTextAreaElement).value);
     setFormErrors((old) => ({...old, content: false}));
   }
 

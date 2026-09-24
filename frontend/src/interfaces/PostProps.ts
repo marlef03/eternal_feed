@@ -1,4 +1,4 @@
-import type { CommentData } from './Comment';
+import type { CommentsData } from './Comment';
 
 export interface PostProps {
   id: number;
@@ -9,5 +9,5 @@ export interface PostProps {
   authorDisplayName: string;
   authorUsername: string;
   authorCreatedAt: Date;
-  comments: CommentData;
+  comments: CommentsData;
 }

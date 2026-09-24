@@ -2,22 +2,22 @@ import { type ReactElement } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import apiClient from '../util/apiClient';
 import Comment from './Comment';
-import { type CommentResponse, type CommentData, commentResponseToData } from '../interfaces/Comment';
+import { type CommentsResponse, type CommentsData, commentsResponseToData } from '../interfaces/Comment';
 import type { CommentListProps } from '../interfaces/CommentListProps';
 import CommentForm from './CommentForm';
 
 async function fetchComments({
   pageParam,
   queryKey,
-}): Promise<CommentData> {
-  let data: CommentResponse;
+}): Promise<CommentsData> {
+  let data: CommentsResponse;
   if (pageParam.beforeTimestamp) {
     data = (await apiClient.get(`/posts/${queryKey[1]}/comments?before_timestamp=${pageParam.beforeTimestamp}&before_id=${pageParam.beforeId}`)).data;
   } else {
     data = (await apiClient.get(`/posts/${queryKey[1]}/comments`)).data;
   }
 
-  return commentResponseToData(data);
+  return commentsResponseToData(data);
 }
 
 function CommentList({
@@ -31,7 +31,7 @@ function CommentList({
     isFetching,
     isFetched,
     status,
-  } = useInfiniteQuery<CommentData>({
+  } = useInfiniteQuery<CommentsData>({
     queryKey: ['comments', postId],
     queryFn: fetchComments,
     initialPageParam: {
@@ -83,7 +83,7 @@ function CommentList({
         postId={postId}
       />
       {
-        preloadedComments.items.length == 0 &&
+        data.pages[0].items.length == 0 &&
         <div
           className="
             text-center
