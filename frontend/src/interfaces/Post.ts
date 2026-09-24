@@ -1,4 +1,4 @@
-import type { CommentResponse, CommentData } from './Comment';
+import type { CommentsResponse, CommentsData } from './Comment';
 import type { AuthorResponse, AuthorData } from './User';
 
 export interface PostResponse {
@@ -7,7 +7,14 @@ export interface PostResponse {
   content: string;
   created_at: string;
   author: AuthorResponse;
-  comments: CommentResponse;
+  comments: CommentsResponse;
+}
+
+export interface PostCreateResponse {
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
 }
 
 export interface PostCreate {
@@ -21,7 +28,7 @@ export interface PostData {
   content: string;
   createdAt: Date;
   author: AuthorData;
-  comments: CommentData;
+  comments: CommentsData;
 }
 
 export function postResponseToData(response: PostResponse): PostData {
@@ -53,13 +60,13 @@ export function postResponseToData(response: PostResponse): PostData {
   }
 }
 
-export function postCreateResponseToData(response: PostResponse, author: AuthorData): PostData {
+export function postCreateResponseToData(response: PostCreateResponse, author: AuthorData): PostData {
   return {
     id: response.id,
     title: response.title,
     content: response.content,
     createdAt: new Date(response.created_at),
-    author: author,
+    author,
     comments: {
       items: [],
       hasMore: false,

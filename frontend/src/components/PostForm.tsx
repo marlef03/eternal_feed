@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { PostCreate, PostResponse, PostData } from '../interfaces/Post';
+import type { PostCreate, PostData, PostCreateResponse } from '../interfaces/Post';
 import { postCreateResponseToData } from '../interfaces/Post';
 import apiClient from '../util/apiClient';
 import { useAuthStatus } from '../util/authStatus';
@@ -22,7 +22,7 @@ function PostForm() {
     isSuccess,
   } = useMutation({
     mutationFn: createPost,
-    onSuccess: (newPostResponse: PostResponse) => {
+    onSuccess: (newPostResponse: PostCreateResponse) => {
       const authorData: UserData | undefined = queryClient.getQueryData(['user']);
 
       if (!authorData) {
@@ -60,7 +60,7 @@ function PostForm() {
   }
 
   function preventFromSubmitting(event: React.KeyboardEvent) {
-    if (event.key == 'Enter' && event.target.tagName !== 'TEXTAREA') {
+    if (event.key == 'Enter' && (event.target as Element).tagName !== 'TEXTAREA') {
       event.preventDefault()
     }
   }
@@ -91,12 +91,12 @@ function PostForm() {
   }
 
   function handleTitleChange(event: React.ChangeEvent) {
-    setTitle(event.target.value);
+    setTitle((event.target as HTMLInputElement).value);
     setFormErrors((old) => ({...old, title: false}));
   }
 
   function handleContentChange(event: React.ChangeEvent) {
-    setContent(event.target.value);
+    setContent((event.target as HTMLTextAreaElement).value);
     setFormErrors((old) => ({...old, content: false}));
   }
 
