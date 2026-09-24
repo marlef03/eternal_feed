@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from src.auth.schemas import TokenResponse
+
 
 class UserCreate(BaseModel):
     display_name: str
@@ -27,3 +29,10 @@ class UserPublicResponse(BaseModel):
     display_name: str
     username: str
     created_at: datetime
+
+
+class NewUserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_data: UserResponse
+    token: TokenResponse

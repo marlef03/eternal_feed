@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
-from src.users.schemas import UserCreate, UserResponse
+from src.users.schemas import UserCreate, UserResponse, NewUserResponse
 from src.users.service import UserService
 from src.users.models import User
 from src.users.dependencies import get_current_user, get_user_service
 
+from src.auth.dependencies import get_auth_service
+from src.auth.service import AuthService
+from src.auth.schemas import TokenResponse
+
+from src.core.config import settings
 from src.core.exceptions import UsernameIsTakenError, EmailIsTakenError
 
 router = APIRouter(
@@ -15,14 +20,34 @@ router = APIRouter(
 
 @router.post(
     "",
-    response_model=UserResponse,
+    response_model=NewUserResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_user(
     data: UserCreate,
-    service: UserService = Depends(get_user_service),
+    response: Response,
+    userService: UserService = Depends(get_user_service),
+    authService: AuthService = Depends(get_auth_service),
 ):
-    return await service.create_user(data)
+    user = await userService.create_user(data)
+
+    access_token, refresh_token = await authService.login(user.id)
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=settings.refresh_token_expire_days * 24 * 60 * 60,
+    )
+
+    return NewUserResponse(
+        user_data=user,
+        token=TokenResponse(
+            access_token=access_token,
+        )
+    )
 
 
 @router.get(
