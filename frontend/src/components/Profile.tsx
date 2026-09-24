@@ -5,6 +5,7 @@ import { userResponseToData, type UserData, type UserResponse } from '../interfa
 import apiClient from '../util/apiClient';
 import { useAuthStatus } from '../util/authStatus';
 import LoginForm from './LoginForm';
+import SignUpForm from './SignUpForm';
 
 async function getUser(): Promise<UserData> {
   const data: UserResponse = (await apiClient.get(`/users/me`)).data;
@@ -16,6 +17,7 @@ function Profile() {
   const authed = useAuthStatus((state) => state.authed);
 
   const [ open, setOpen ] = React.useState(false);
+  const [ isLoginPage, setIsLoginPage ] = React.useState(true);
 
   const {
     data,
@@ -33,11 +35,11 @@ function Profile() {
 
   return (
     <div
-      className="flex flex-col items-end"
+      className="w-[calc(100%-0.5rem)] max-w-md m-1 fixed right-0 top-0 flex flex-col items-end"
     >
       <button
         onClick={() => setOpen(!open)}
-        className="cursor-pointer bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 m-1 shadow-md"
+        className="w-32 cursor-pointer bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 mb-1 shadow-md"
       >
         {
           isLoading &&
@@ -50,7 +52,13 @@ function Profile() {
             authed ? 
               data?.displayName
             :
-              'Войти'
+              !open ?
+                'Войти'
+              :
+                isLoginPage ?
+                  'Вход'
+                :
+                  'Регистрация'
           )
         }
       </button>
@@ -58,7 +66,7 @@ function Profile() {
         !isLoading && open && (
           authed ?
             <div
-              className="w-36 float-right bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 m-1 shadow-md"
+              className="w-full bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 shadow-md"
             >
               <div
                 className="block text-center p-1 pt-0 bg-mist-200 dark:bg-mist-700 rounded-xl mb-2"
@@ -66,13 +74,22 @@ function Profile() {
                 {`${data?.displayName} (@${data?.username})`}
               </div>
               <div
-                className="block text-center p-1 pt-0 bg-mist-200 dark:bg-mist-700 rounded-xl mb-2"
+                className="block text-center p-1 pt-0 bg-mist-200 dark:bg-mist-700 rounded-xl"
               >
                 {data?.email}
               </div>
             </div>
           :
-            <LoginForm />
+            isLoginPage ? 
+              <LoginForm 
+                close={() => setOpen(false)}
+                goToSignUp={() => setIsLoginPage(false)}
+              />
+            :
+              <SignUpForm
+                close={() => setOpen(false)}
+                goToLogin={() => setIsLoginPage(true)}
+              />
         )
       }
     </div>

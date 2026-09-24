@@ -1,3 +1,18 @@
+export interface SignUpData {
+  display_name: string;
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface SignUpFormErrors {
+  displayName: string | null;
+  username: string | null;
+  email: string | null;
+  password: string | null;
+  passwordAgain: string | null;
+}
+
 export interface UsernameLoginData {
   username: string;
   password: string;

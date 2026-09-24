@@ -1,3 +1,5 @@
+import type { TokenData } from './Auth';
+
 export interface AuthorResponse {
   id: number;
   display_name: string;
@@ -28,12 +30,26 @@ export interface UserData {
   createdAt: Date;
 }
 
+export interface NewUserResponse {
+  user_data: UserResponse;
+  token: TokenData;
+}
+
 export function userResponseToData(response: UserResponse): UserData {
   return {
     id: response.id,
     displayName: response.display_name,
     username: response.username,
     email: response.email,
+    createdAt: new Date(response.created_at),
+  };
+}
+
+export function authorResponseToData(response: AuthorResponse): AuthorData {
+  return {
+    id: response.id,
+    displayName: response.display_name,
+    username: response.username,
     createdAt: new Date(response.created_at),
   };
 }

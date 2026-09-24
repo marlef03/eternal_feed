@@ -4,6 +4,7 @@ import apiClient from '../util/apiClient';
 import type { UsernameLoginData, EmailLoginData, TokenData, LoginParams, LoginFormErrors } from '../interfaces/Auth';
 import tokenStore from '../util/tokenStore';
 import { isValidEmail } from '../util/helperFunctions';
+import useOutsideClick from '../hooks/useOutsideClick';
 
 async function loginViaUsername(loginData: UsernameLoginData): Promise<TokenData> {
   return (await apiClient.post('/auth/login/username', loginData)).data;
@@ -28,7 +29,10 @@ async function login({ loginData, type }: LoginParams) {
   }
 }
 
-function LoginForm() {
+function LoginForm({
+  goToSignUp,
+  close,
+}: { goToSignUp: () => void, close: () => void }) {
   const queryClient = useQueryClient();
 
   const {
@@ -46,6 +50,10 @@ function LoginForm() {
     userLogin: null,
     password: null,
   });
+
+  const formRef = React.useRef<HTMLDivElement>(null);
+  
+  useOutsideClick(formRef, close);
 
   function handleSubmit(event: React.SubmitEvent) {
     event.preventDefault();
@@ -104,14 +112,14 @@ function LoginForm() {
   }
 
   function handleUserLoginChange(event: React.ChangeEvent) {
-    setUserLogin(event.target.value);
+    setUserLogin((event.target as HTMLInputElement).value);
 
-    const error = event.target.value.includes('@') && !isValidEmail(event.target.value) ? 'Некорректный адрес электронной почты' : null;
+    const error = (event.target as HTMLInputElement).value.includes('@') && !isValidEmail((event.target as HTMLInputElement).value) ? 'Некорректный адрес электронной почты' : null;
     setFormErrors((old) => ({...old, userLogin: error}));
   }
 
   function handlePasswordChange(event: React.ChangeEvent) {
-    setPassword(event.target.value);
+    setPassword((event.target as HTMLInputElement).value);
     setFormErrors((old) => ({...old, password: null}));
   }
 
@@ -127,7 +135,8 @@ function LoginForm() {
 
   return (
     <div
-      className="float-right bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 m-1 shadow-md"
+      ref={formRef}
+      className="w-full bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 shadow-md"
     >
       <form
         onSubmit={handleSubmit}
@@ -234,6 +243,23 @@ function LoginForm() {
           </div>
         }
       </form>
+      <button
+        onClick={goToSignUp}
+        className="
+          w-full
+          text-center
+          mt-2 p-1
+          rounded-xl
+          bg-mist-200
+          dark:bg-mist-700
+          hover:cursor-pointer
+          hover:bg-mist-50
+          hover:dark:bg-mist-900
+          transition-colors
+        "
+      >
+        Еще нет аккаунта
+      </button>
     </div>
   );
 }
