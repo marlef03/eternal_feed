@@ -4,7 +4,6 @@ import apiClient from '../util/apiClient';
 import type { UsernameLoginData, EmailLoginData, TokenData, LoginParams, LoginFormErrors } from '../interfaces/Auth';
 import tokenStore from '../util/tokenStore';
 import { isValidEmail } from '../util/helperFunctions';
-import useOutsideClick from '../hooks/useOutsideClick';
 
 async function loginViaUsername(loginData: UsernameLoginData): Promise<TokenData> {
   return (await apiClient.post('/auth/login/username', loginData)).data;
@@ -31,8 +30,7 @@ async function login({ loginData, type }: LoginParams) {
 
 function LoginForm({
   goToSignUp,
-  close,
-}: { goToSignUp: () => void, close: () => void }) {
+}: { goToSignUp: () => void }) {
   const queryClient = useQueryClient();
 
   const {
@@ -50,10 +48,6 @@ function LoginForm({
     userLogin: null,
     password: null,
   });
-
-  const formRef = React.useRef<HTMLDivElement>(null);
-  
-  useOutsideClick(formRef, close);
 
   function handleSubmit(event: React.SubmitEvent) {
     event.preventDefault();
@@ -135,8 +129,7 @@ function LoginForm({
 
   return (
     <div
-      ref={formRef}
-      className="w-full bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 shadow-md"
+      className="bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 shadow-md"
     >
       <form
         onSubmit={handleSubmit}

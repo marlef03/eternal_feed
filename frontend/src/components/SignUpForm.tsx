@@ -4,7 +4,6 @@ import apiClient from '../util/apiClient';
 import type { SignUpData, SignUpFormErrors } from '../interfaces/Auth';
 import { doesIncludeDigits, doesIncludeLowercaseLetter, doesIncludeProhibitedChars, doesIncludeUppercaseLetter, isValidEmail, isValidUsername } from '../util/helperFunctions';
 import axios from 'axios';
-import useOutsideClick from '../hooks/useOutsideClick';
 import { userResponseToData, type NewUserResponse } from '../interfaces/User';
 import tokenStore from '../util/tokenStore';
 import { useAuthStatus } from '../util/authStatus';
@@ -15,8 +14,7 @@ async function signUp(newUserData: SignUpData): Promise<NewUserResponse> {
 
 function SignUpForm({
   goToLogin,
-  close,
-}: { goToLogin: () => void, close: () => void }) {
+}: { goToLogin: () => void }) {
   const queryClient = useQueryClient();
 
   const {
@@ -53,10 +51,6 @@ function SignUpForm({
 
   const usernameTimeoutId = React.useRef<number>(undefined);
   const emailTimeoutId = React.useRef<number>(undefined);
-
-  const formRef = React.useRef<HTMLDivElement>(null);
-
-  useOutsideClick(formRef, close);
 
   React.useEffect(() => {
     return () => {
@@ -292,7 +286,6 @@ function SignUpForm({
 
   return (
     <div
-      ref={formRef}
       className={`
         w-full
         max-h-[80vh]
@@ -401,7 +394,7 @@ function SignUpForm({
             </div>
           }
           <input
-            type="text"
+            type="email"
             onChange={handleEmailChange}
             value={email}
             className={`
