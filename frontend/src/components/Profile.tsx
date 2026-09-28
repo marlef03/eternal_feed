@@ -102,6 +102,7 @@ function Profile() {
             transitionProperty: 'margin-right',
           }}
           duration={250}
+          className="w-full h-full relative"
         >
           {
             authed ?
@@ -145,14 +146,54 @@ function Profile() {
                 }
               </div>
             :
-              isLoginPage ? 
+            <>
+              <Transition
+                appear={isLoginPage}
+                onAppearStyle={{
+                  right: '0px',
+                  transitionProperty: 'right',
+                }}
+                onDisappearStyle={{
+                  right: '-500px',
+                  transitionProperty: 'right',
+                }}
+                delay={250}
+                duration={250}
+                ignoreOnInit={true}
+                className="w-full h-full absolute"
+              >
                 <LoginForm 
                   goToSignUp={() => setIsLoginPage(false)}
                 />
-              :
+              </Transition>
+              <Transition
+                appear={!isLoginPage}
+                onAppearStyle={{
+                  right: '0px',
+                  transitionProperty: 'right',
+                }}
+                onDisappearStyle={{
+                  right: '-500px',
+                  transitionProperty: 'right',
+                }}
+                delay={250}
+                duration={250}
+                ignoreOnInit={true}
+                className="w-full h-full absolute"
+              >
                 <SignUpForm
                   goToLogin={() => setIsLoginPage(true)}
                 />
+              </Transition>
+            </>
+              // isLoginPage ? 
+              //   <LoginForm 
+              //     goToSignUp={() => setIsLoginPage(false)}
+              //   />
+              // :
+              //   <SignUpForm
+              //     goToLogin={() => setIsLoginPage(true)}
+              //   />
           }
         </Transition>
       }
