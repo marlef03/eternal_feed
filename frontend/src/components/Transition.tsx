@@ -7,38 +7,45 @@ function Transition({
   onDisappearStyle,
   delay = 0,
   duration,
+  ignoreOnInit = false,
+  className = "",
   children,
 }: TransitionProps) {
-  const [ exists, setExists ] = useState(false);
-  const [ init, setInit ] = useState(true);
+  const [ exists, setExists ] = useState(appear ? ignoreOnInit : false);
+  const [ init, setInit ] = useState(!ignoreOnInit);
   const appearTimeoutId = useRef<number>(null);
   const disappearTimeoutId = useRef<number>(null);
+  const ignore = useRef<boolean>(ignoreOnInit);
   
   useEffect(() => {
-    if (appear) {
-      if (disappearTimeoutId.current != null) {
-        clearTimeout(disappearTimeoutId.current);
-        disappearTimeoutId.current = null;
+    if (!ignore.current) {
+      if (appear) {
+        if (disappearTimeoutId.current != null) {
+          clearTimeout(disappearTimeoutId.current);
+          disappearTimeoutId.current = null;
 
-        setExists(false);
-        setInit(true);
+          setExists(false);
+          setInit(true);
+        }
+        setTimeout(() => {
+          setExists(true);
+          setTimeout(() => setInit(false), 0);
+        }, delay);
+      } else {
+        if (appearTimeoutId.current != null) {
+          clearTimeout(appearTimeoutId.current);
+          appearTimeoutId.current = null;
+
+          setExists(true);
+          setTimeout(() => setInit(false), 0);
+        }
+        disappearTimeoutId.current = setTimeout(() => {
+          setExists(false);
+          setInit(true);
+        }, duration);
       }
-      setTimeout(() => {
-        setExists(true);
-        setTimeout(() => setInit(false), 0);
-      }, delay);
     } else {
-      if (appearTimeoutId.current != null) {
-        clearTimeout(appearTimeoutId.current);
-        appearTimeoutId.current = null;
-
-        setExists(true);
-        setTimeout(() => setInit(false), 0);
-      }
-      disappearTimeoutId.current = setTimeout(() => {
-        setExists(false);
-        setInit(true);
-      }, duration);
+      ignore.current = false;
     }
 
     return () => {
@@ -49,19 +56,32 @@ function Transition({
 
   return (
     <div
-      className="w-full h-full"
-      style={{
-        ...(
-        init ? 
-          onDisappearStyle
+      className={className}
+      style={
+        ignore.current ? 
+          {
+            ...(
+            appear ? 
+              onAppearStyle
+            :
+              onDisappearStyle
+            ),
+            transition: 'none',
+          }
         :
-          appear ? 
-            onAppearStyle
-          :
-            onDisappearStyle
-        ),
-        transitionDuration: duration + 'ms',
-      }}
+          {
+            ...(
+            init ? 
+              onDisappearStyle
+            :
+              appear ? 
+                onAppearStyle
+              :
+                onDisappearStyle
+            ),
+            transitionDuration: duration + 'ms',
+          }
+      }
     >
       { exists && children }
     </div>

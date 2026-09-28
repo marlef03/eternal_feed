@@ -6,5 +6,7 @@ export interface TransitionProps {
   onDisappearStyle: React.CSSProperties;
   delay?: number;
   duration: number;
+  ignoreOnInit?: boolean;
+  className?: string;
   children: ReactNode;
 }
