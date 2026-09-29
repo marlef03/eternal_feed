@@ -1,4 +1,4 @@
-import type { CommentsData } from './Comment';
+import type { CommentsData } from "./Comment";
 
 export interface PostProps {
   id: number;

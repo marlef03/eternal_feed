@@ -1,4 +1,8 @@
-import { type AuthorResponse, type AuthorData, authorResponseToData } from './User';
+import {
+  type AuthorData,
+  type AuthorResponse,
+  authorResponseToData,
+} from "./User";
 
 export interface CommentResponse {
   id: number;
@@ -34,21 +38,24 @@ export interface CommentsData {
   hasMore: boolean;
 }
 
-export function commentsResponseToData(response: CommentsResponse): CommentsData {
+export function commentsResponseToData(
+  response: CommentsResponse,
+): CommentsData {
   return {
-    items: response.items.map(
-      (item) => ({
-        id: item.id,
-        content: item.content,
-        createdAt: new Date(item.created_at),
-        author: authorResponseToData(item.author),
-      })
-    ),
+    items: response.items.map((item) => ({
+      id: item.id,
+      content: item.content,
+      createdAt: new Date(item.created_at),
+      author: authorResponseToData(item.author),
+    })),
     hasMore: response.has_more,
   };
 }
 
-export function commentCreateResponseToData(response: CommentResponse, author: AuthorData): CommentData {
+export function commentCreateResponseToData(
+  response: CommentResponse,
+  author: AuthorData,
+): CommentData {
   return {
     id: response.id,
     content: response.content,

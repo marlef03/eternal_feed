@@ -1,5 +1,10 @@
-import type { CommentsResponse, CommentsData } from './Comment';
-import type { AuthorResponse, AuthorData } from './User';
+import type { CommentsData, CommentsResponse } from "./Comment";
+import {
+  type AuthorData,
+  type AuthorResponse,
+  authorResponseToData,
+  type UserResponse,
+} from "./User";
 
 export interface PostResponse {
   id: number;
@@ -15,6 +20,7 @@ export interface PostCreateResponse {
   title: string;
   content: string;
   created_at: string;
+  author: UserResponse;
 }
 
 export interface PostCreate {
@@ -56,20 +62,22 @@ export function postResponseToData(response: PostResponse): PostData {
         },
       })),
       hasMore: response.comments.has_more,
-    }
-  }
+    },
+  };
 }
 
-export function postCreateResponseToData(response: PostCreateResponse, author: AuthorData): PostData {
+export function postCreateResponseToData(
+  response: PostCreateResponse,
+): PostData {
   return {
     id: response.id,
     title: response.title,
     content: response.content,
     createdAt: new Date(response.created_at),
-    author,
+    author: authorResponseToData(response.author),
     comments: {
       items: [],
       hasMore: false,
-    }
-  }
+    },
+  };
 }

@@ -1,13 +1,13 @@
-import axios from 'axios';
-import tokenStore from './tokenStore';
-import { useAuthStatus } from './authStatus';
+import axios from "axios";
+import { useAuthStatus } from "./authStatus";
+import tokenStore from "./tokenStore";
 
 const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: "/api/v1",
   withCredentials: true,
   timeout: 5000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -21,7 +21,10 @@ apiClient.interceptors.request.use((config) => {
 });
 
 let isRefreshing = false;
-let failedQueue: { resolve: (token: string | null) => void, reject: (error: Error | null) => void }[] = [];
+let failedQueue: {
+  resolve: (token: string | null) => void;
+  reject: (error: Error | null) => void;
+}[] = [];
 
 const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue.forEach((prom) => {
@@ -36,7 +39,7 @@ const processQueue = (error: Error | null, token: string | null = null) => {
 
 apiClient.interceptors.response.use(
   (response) => {
-    if (response.config.url == '/users/me') {
+    if (response.config.url === "/users/me") {
       useAuthStatus.setState({ authed: true });
     }
 
@@ -51,7 +54,7 @@ apiClient.interceptors.response.use(
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers["Authorization"] = `Bearer ${token}`;
+            originalRequest.headers.Authorization = `Bearer ${token}`;
             return apiClient(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -61,16 +64,20 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post("/auth/refresh", {}, {
-          baseURL: '/api/v1',
-          withCredentials: true,
-        });
+        const { data } = await axios.post(
+          "/auth/refresh",
+          {},
+          {
+            baseURL: "/api/v1",
+            withCredentials: true,
+          },
+        );
 
         const newToken = data.access_token;
 
         tokenStore.set(newToken);
 
-        apiClient.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+        apiClient.defaults.headers.common.Authorization = `Bearer ${newToken}`;
 
         useAuthStatus.setState({ authed: true });
 
@@ -91,7 +98,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

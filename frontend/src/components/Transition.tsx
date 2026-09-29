@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import type { TransitionProps } from '../interfaces/TransitionProps';
+import { useEffect, useRef, useState } from "react";
+import type { TransitionProps } from "../interfaces/TransitionProps";
 
 function Transition({
   appear,
@@ -11,12 +11,12 @@ function Transition({
   className = "",
   children,
 }: TransitionProps) {
-  const [ exists, setExists ] = useState(appear ? ignoreOnInit : false);
-  const [ init, setInit ] = useState(!ignoreOnInit);
+  const [exists, setExists] = useState(appear ? ignoreOnInit : false);
+  const [init, setInit] = useState(!ignoreOnInit);
   const appearTimeoutId = useRef<number>(null);
   const disappearTimeoutId = useRef<number>(null);
   const ignore = useRef<boolean>(ignoreOnInit);
-  
+
   useEffect(() => {
     if (!ignore.current) {
       if (appear) {
@@ -49,41 +49,33 @@ function Transition({
     }
 
     return () => {
-      if (appearTimeoutId.current != null) clearTimeout(appearTimeoutId.current);
-      if (disappearTimeoutId.current != null) clearTimeout(disappearTimeoutId.current);
-    }
+      if (appearTimeoutId.current != null)
+        clearTimeout(appearTimeoutId.current);
+      if (disappearTimeoutId.current != null)
+        clearTimeout(disappearTimeoutId.current);
+    };
   }, [appear, duration, delay]);
 
   return (
     <div
       className={className}
       style={
-        ignore.current ? 
-          {
-            ...(
-            appear ? 
-              onAppearStyle
-            :
-              onDisappearStyle
-            ),
-            transition: 'none',
-          }
-        :
-          {
-            ...(
-            init ? 
-              onDisappearStyle
-            :
-              appear ? 
-                onAppearStyle
-              :
-                onDisappearStyle
-            ),
-            transitionDuration: duration + 'ms',
-          }
+        ignore.current
+          ? {
+              ...(appear ? onAppearStyle : onDisappearStyle),
+              transition: "none",
+            }
+          : {
+              ...(init
+                ? onDisappearStyle
+                : appear
+                  ? onAppearStyle
+                  : onDisappearStyle),
+              transitionDuration: `${duration}ms`,
+            }
       }
     >
-      { exists && children }
+      {exists && children}
     </div>
   );
 }

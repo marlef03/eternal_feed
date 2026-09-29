@@ -1,4 +1,4 @@
-import type { TokenData } from './Auth';
+import type { TokenData } from "./Auth";
 
 export interface AuthorResponse {
   id: number;

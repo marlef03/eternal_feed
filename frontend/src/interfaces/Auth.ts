@@ -28,14 +28,14 @@ export interface LoginFormErrors {
   password: string | null;
 }
 
-export type LoginType = 'username' | 'email';
+export type LoginType = "username" | "email";
 
 export interface LoginParams {
-  loginData: UsernameLoginData | EmailLoginData; 
+  loginData: UsernameLoginData | EmailLoginData;
   type: LoginType;
 }
 
 export interface TokenData {
-	access_token: string;
+  access_token: string;
   token_type: string;
 }

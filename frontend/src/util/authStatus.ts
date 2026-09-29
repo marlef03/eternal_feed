@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface AuthStatusState {
   authed: boolean;
@@ -14,5 +14,5 @@ const useAuthStatus = create<AuthStatusState>((set) => ({
   logout: () => set(() => ({ authed: false })),
 }));
 
-export { useAuthStatus };
 export type { AuthStatusState };
+export { useAuthStatus };
