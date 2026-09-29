@@ -10,16 +10,28 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.0
+  - repo: local
     hooks:
-      - id: ruff
-        args: [--fix]
+      - id: uv-ruff-check
+        name: ruff
+        entry: uv run --frozen ruff check --fix
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false
 
-      - id: ruff-format
+      - id: uv-ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.0
+  - repo: local
     hooks:
-      - id: mypy
+      - id: uv-mypy
+        name: mypy
+        entry: uv run --frozen --directory=backend mypy
+        language: system
+        types: [python]
         files: ^backend/(main\.py|src/)
+        pass_filenames: false
