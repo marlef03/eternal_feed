@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import {
   type CommentCreate,
   type CommentResponse,
@@ -8,6 +8,7 @@ import {
 } from "../interfaces/Comment";
 import apiClient from "../util/apiClient";
 import { useAuthStatus } from "../util/authStatus";
+import Transition from "./Transition";
 
 async function createComment(
   postId: number,
@@ -20,9 +21,12 @@ async function createComment(
 function CommentForm({ postId }: { postId: number }) {
   const authed = useAuthStatus((state) => state.authed);
 
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+
   const queryClient = useQueryClient();
 
-  const { mutate, isPending, isError, isSuccess } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: (data: CommentCreate) => createComment(postId, data),
     onSuccess: (newCommentResponse: CommentResponse) => {
       const newComment = commentCreateResponseToData(newCommentResponse);
@@ -42,6 +46,13 @@ function CommentForm({ postId }: { postId: number }) {
           };
         },
       );
+
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 2000);
+    },
+    onError: () => {
+      setIsError(true);
+      setTimeout(() => setIsError(false), 2000);
     },
   });
 
@@ -125,16 +136,44 @@ function CommentForm({ postId }: { postId: number }) {
         >
           Опубликовать
         </button>
-        {isError && (
-          <div className="text-center mt-2 p-1 rounded-xl bg-red-200 dark:bg-red-900">
+        <Transition
+          appear={isError}
+          onAppearStyle={{
+            opacity: 1,
+            height: "60px",
+            transitionProperty: "height opacity",
+          }}
+          onDisappearStyle={{
+            opacity: 0,
+            height: "0px",
+            transitionProperty: "height opacity",
+          }}
+          duration={200}
+          className="flex items-center overflow-hidden"
+        >
+          <div className="w-full text-center mt-2 p-1 rounded-xl bg-red-200 dark:bg-red-900">
             Ошибка во время публикации комментария
           </div>
-        )}
-        {isSuccess && (
-          <div className="text-center mt-2 p-1 rounded-xl bg-emerald-200 dark:bg-emerald-900">
+        </Transition>
+        <Transition
+          appear={isSuccess}
+          onAppearStyle={{
+            opacity: 1,
+            height: "60px",
+            transitionProperty: "height opacity",
+          }}
+          onDisappearStyle={{
+            opacity: 0,
+            height: "0px",
+            transitionProperty: "height opacity",
+          }}
+          duration={200}
+          className="flex items-center overflow-hidden"
+        >
+          <div className="w-full text-center mt-2 p-1 rounded-xl bg-emerald-200 dark:bg-emerald-900">
             Комментарий успешно опубликован!
           </div>
-        )}
+        </Transition>
       </form>
     </div>
   );
