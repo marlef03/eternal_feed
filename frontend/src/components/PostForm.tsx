@@ -169,7 +169,7 @@ function PostForm() {
           duration={200}
           className="flex items-center overflow-hidden"
         >
-          <div className="text-center mt-2 p-1 rounded-xl bg-red-200 dark:bg-red-900">
+          <div className="w-full text-center mt-2 p-1 rounded-xl bg-red-200 dark:bg-red-900">
             Ошибка во время публикации поста
           </div>
         </Transition>
