@@ -100,19 +100,18 @@ function Profile() {
           duration={250}
           className="w-full h-full relative"
         >
-          {
-            authed ? (
-              <div className="w-[calc(100%-0.5rem)] max-w-md bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 shadow-md">
-                <div className="block text-center p-1 pt-0 bg-mist-200 dark:bg-mist-700 rounded-xl mb-2">
-                  {`${data?.displayName} (@${data?.username})`}
-                </div>
-                <div className="block text-center p-1 pt-0 bg-mist-200 dark:bg-mist-700 rounded-xl">
-                  {data?.email}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="
+          {authed ? (
+            <div className="w-[calc(100%-0.5rem)] max-w-md bg-mist-100 dark:bg-mist-800 border border-mist-400 rounded-2xl dark:border-mist-600 p-2 shadow-md">
+              <div className="block text-center p-1 pt-0 bg-mist-200 dark:bg-mist-700 rounded-xl mb-2">
+                {`${data?.displayName} (@${data?.username})`}
+              </div>
+              <div className="block text-center p-1 pt-0 bg-mist-200 dark:bg-mist-700 rounded-xl">
+                {data?.email}
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="
                     w-full
                     text-center
                     mt-2 p-1
@@ -124,54 +123,53 @@ function Profile() {
                     hover:dark:bg-mist-900
                     transition-colors
                   "
-                >
-                  Выйти
-                </button>
-                {isLogoutError && (
-                  <div className="text-center mt-2 p-1 rounded-xl bg-red-200 dark:bg-red-900">
-                    Произошла ошибка во время выхода
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                <Transition
-                  appear={isLoginPage}
-                  onAppearStyle={{
-                    right: "0px",
-                    transitionProperty: "right",
-                  }}
-                  onDisappearStyle={{
-                    right: "-500px",
-                    transitionProperty: "right",
-                  }}
-                  delay={250}
-                  duration={250}
-                  ignoreOnInit={true}
-                  className="w-full h-full absolute"
-                >
-                  <LoginForm goToSignUp={() => setIsLoginPage(false)} />
-                </Transition>
-                <Transition
-                  appear={!isLoginPage}
-                  onAppearStyle={{
-                    right: "0px",
-                    transitionProperty: "right",
-                  }}
-                  onDisappearStyle={{
-                    right: "-500px",
-                    transitionProperty: "right",
-                  }}
-                  delay={250}
-                  duration={250}
-                  ignoreOnInit={true}
-                  className="w-full h-full absolute"
-                >
-                  <SignUpForm goToLogin={() => setIsLoginPage(true)} />
-                </Transition>
-              </>
-            )
-          }
+              >
+                Выйти
+              </button>
+              {isLogoutError && (
+                <div className="text-center mt-2 p-1 rounded-xl bg-red-200 dark:bg-red-900">
+                  Произошла ошибка во время выхода
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Transition
+                appear={isLoginPage}
+                onAppearStyle={{
+                  right: "0px",
+                  transitionProperty: "right",
+                }}
+                onDisappearStyle={{
+                  right: "-500px",
+                  transitionProperty: "right",
+                }}
+                delay={250}
+                duration={250}
+                ignoreOnInit={true}
+                className="w-full h-full absolute"
+              >
+                <LoginForm goToSignUp={() => setIsLoginPage(false)} />
+              </Transition>
+              <Transition
+                appear={!isLoginPage}
+                onAppearStyle={{
+                  right: "0px",
+                  transitionProperty: "right",
+                }}
+                onDisappearStyle={{
+                  right: "-500px",
+                  transitionProperty: "right",
+                }}
+                delay={250}
+                duration={250}
+                ignoreOnInit={true}
+                className="w-full h-full absolute"
+              >
+                <SignUpForm goToLogin={() => setIsLoginPage(true)} />
+              </Transition>
+            </>
+          )}
         </Transition>
       }
     </div>

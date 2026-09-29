@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import type { PostCreate } from "../interfaces/Post";
 import apiClient from "../util/apiClient";
 import { useAuthStatus } from "../util/authStatus";
+import Transition from "./Transition";
 
 async function createPost(newPostData: PostCreate) {
   return (await apiClient.post("/posts", newPostData)).data;
@@ -11,8 +12,19 @@ async function createPost(newPostData: PostCreate) {
 function PostForm() {
   const authed = useAuthStatus((state) => state.authed);
 
-  const { mutate, isPending, isError, isSuccess } = useMutation({
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  const { mutate, isPending } = useMutation({
     mutationFn: createPost,
+    onSuccess: () => {
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 2000);
+    },
+    onError: () => {
+      setIsError(true);
+      setTimeout(() => setIsError(false), 2000);
+    },
   });
 
   const [title, setTitle] = React.useState("");
@@ -142,16 +154,44 @@ function PostForm() {
         >
           Опубликовать
         </button>
-        {isError && (
+        <Transition
+          appear={isError}
+          onAppearStyle={{
+            opacity: 1,
+            height: "60px",
+            transitionProperty: "height opacity",
+          }}
+          onDisappearStyle={{
+            opacity: 0,
+            height: "0px",
+            transitionProperty: "height opacity",
+          }}
+          duration={200}
+          className="flex items-center overflow-hidden"
+        >
           <div className="text-center mt-2 p-1 rounded-xl bg-red-200 dark:bg-red-900">
             Ошибка во время публикации поста
           </div>
-        )}
-        {isSuccess && (
-          <div className="text-center mt-2 p-1 rounded-xl bg-emerald-200 dark:bg-emerald-900">
+        </Transition>
+        <Transition
+          appear={isSuccess}
+          onAppearStyle={{
+            opacity: 1,
+            height: "60px",
+            transitionProperty: "height opacity",
+          }}
+          onDisappearStyle={{
+            opacity: 0,
+            height: "0px",
+            transitionProperty: "height opacity",
+          }}
+          duration={200}
+          className="flex items-center overflow-hidden"
+        >
+          <div className="w-full text-center mt-2 p-1 rounded-xl bg-emerald-200 dark:bg-emerald-900">
             Пост успешно опубликован!
           </div>
-        )}
+        </Transition>
       </form>
     </div>
   );
