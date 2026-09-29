@@ -171,14 +171,6 @@ function Profile() {
                 </Transition>
               </>
             )
-            // isLoginPage ?
-            //   <LoginForm
-            //     goToSignUp={() => setIsLoginPage(false)}
-            //   />
-            // :
-            //   <SignUpForm
-            //     goToLogin={() => setIsLoginPage(true)}
-            //   />
           }
         </Transition>
       }
