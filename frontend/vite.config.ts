@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import fs from 'node:fs'
-import path from 'node:path'
+import fs from "node:fs";
+import path from "node:path";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,10 +10,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
     {
-      name: 'file-giver',
+      name: "file-giver",
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
-          if (req.url && req.url.startsWith('/media')) {
+          if (req.url?.startsWith("/media")) {
             const filePath = path.resolve(req.url);
 
             if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
@@ -24,12 +24,12 @@ export default defineConfig({
             }
           }
           next();
-        })
-      }
-    }
+        });
+      },
+    },
   ],
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 5173,
     hmr: {
       overlay: true,
@@ -38,14 +38,14 @@ export default defineConfig({
       usePolling: true,
     },
     proxy: {
-      '/api': {
-        target: 'http://backend:8000',
+      "/api": {
+        target: "http://backend:8000",
         changeOrigin: true,
         secure: false,
       },
     },
     fs: {
-      allow: ['/media', '.'],
-    }
+      allow: ["/media", "."],
+    },
   },
-})
+});

@@ -16,6 +16,7 @@ dependencies = [
     "sqlalchemy>=2.0.52",
     "uvicorn>=0.52.4",
     "python-multipart>=0.0.32",
+    "redis[hiredis]>=8.1.0",
 ]
 
 [dependency-groups]
@@ -27,6 +28,7 @@ dev = [
 ]
 
 [tool.ruff]
+line-length = 88
 exclude = [
     "alembic/",
 ]
@@ -34,3 +36,29 @@ force-exclude = true
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends"]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+]
+ignore = []
+
+[tool.mypy]
+python_version = "3.13"
+plugins = [
+    "pydantic.mypy",
+    "sqlalchemy.ext.mypy.plugin",
+]
+files = ["main.py", "src"]
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = false
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true

@@ -12,9 +12,7 @@ dist
 dist-ssr
 *.local
 .env
-*.dev*
 media/
-.pre-commit-config.yaml
 
 # Editor directories and files
 .vscode/*
