@@ -9,6 +9,7 @@ import type { CommentListProps } from "../interfaces/CommentListProps";
 import apiClient from "../util/apiClient";
 import Comment from "./Comment";
 import CommentForm from "./CommentForm";
+import Transition from "./Transition";
 
 async function fetchComments({ pageParam, queryKey }): Promise<CommentsData> {
   let data: CommentsResponse;
@@ -60,16 +61,30 @@ function CommentList({ postId, preloadedComments }: CommentListProps) {
     data.pages.forEach((page) => {
       comments.push(
         ...page.items.map((comment) => (
-          <Comment
+          <Transition
             key={comment.id}
-            id={comment.id}
-            content={comment.content}
-            createdAt={comment.createdAt}
-            authorId={comment.author.id}
-            authorDisplayName={comment.author.displayName}
-            authorUsername={comment.author.username}
-            authorCreatedAt={comment.author.createdAt}
-          />
+            appear={true}
+            onAppearStyle={{
+              filter: "none",
+              transitionProperty: "filter",
+            }}
+            onDisappearStyle={{
+              filter: "brightness(0.3) invert(1)",
+              transitionProperty: "filter",
+            }}
+            duration={300}
+            className="not-first:mt-2"
+          >
+            <Comment
+              id={comment.id}
+              content={comment.content}
+              createdAt={comment.createdAt}
+              authorId={comment.author.id}
+              authorDisplayName={comment.author.displayName}
+              authorUsername={comment.author.username}
+              authorCreatedAt={comment.author.createdAt}
+            />
+          </Transition>
         )),
       );
     });
