@@ -1,14 +1,13 @@
+from collections.abc import Sequence
 from datetime import datetime
 
-from sqlalchemy import select, or_, and_, true
-from sqlalchemy.orm import contains_eager, aliased, joinedload, selectinload
+from sqlalchemy import and_, or_, select, true
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.posts.models import Post
+from sqlalchemy.orm import aliased, contains_eager, joinedload, selectinload
 
 from src.comments.models import Comment
-
 from src.core.config import settings
+from src.posts.models import Post
 
 
 class PostRepository:
@@ -19,14 +18,10 @@ class PostRepository:
         result = await self.session.execute(select(Post).where(Post.id == post_id))
 
         return result.scalar_one_or_none()
-    
+
     async def get_by_id_with_author(self, post_id: int) -> Post | None:
         result = await self.session.execute(
-            select(Post)
-            .where(Post.id == post_id)
-            .options(
-                joinedload(Post.author)
-            )
+            select(Post).where(Post.id == post_id).options(joinedload(Post.author))
         )
 
         return result.scalar_one_or_none()
@@ -35,8 +30,7 @@ class PostRepository:
         self,
         timestamp: datetime,
         id: int,
-    ) -> list[Post] | None:
-        
+    ) -> Sequence[Post]:
         result = await self.session.execute(
             select(Post)
             .where(
@@ -50,13 +44,12 @@ class PostRepository:
         )
 
         return result.scalars().all()
-    
+
     async def get_before_with_author(
         self,
         timestamp: datetime,
         id: int,
-    ) -> list[Post] | None:
-        
+    ) -> Sequence[Post]:
         result = await self.session.execute(
             select(Post)
             .where(
@@ -73,13 +66,12 @@ class PostRepository:
         )
 
         return result.scalars().all()
-    
+
     async def get_before_with_comments(
         self,
         timestamp: datetime,
         id: int,
-    ) -> list[Post] | None:
-        
+    ) -> Sequence[Post]:
         post_subquery = (
             select(Post)
             .where(
@@ -102,15 +94,16 @@ class PostRepository:
             .limit(settings.comments_preloaded + 1)
             .lateral()
         )
-        
+
         comment_alias = aliased(Comment, comment_lateral)
 
         result = await self.session.execute(
             select(post_alias)
             .outerjoin(comment_lateral, true())
             .options(
-                contains_eager(post_alias.comments.of_type(comment_alias))
-                .selectinload(comment_alias.author),
+                contains_eager(post_alias.comments.of_type(comment_alias)).selectinload(
+                    comment_alias.author
+                ),
                 selectinload(post_alias.author),
             )
             .order_by(post_alias.created_at.desc(), post_alias.id.desc())
@@ -118,7 +111,7 @@ class PostRepository:
 
         return result.scalars().unique().all()
 
-    async def get_latest(self) -> list[Post] | None:
+    async def get_latest(self) -> Sequence[Post]:
         result = await self.session.execute(
             select(Post)
             .order_by(Post.created_at.desc(), Post.id.desc())
@@ -126,20 +119,18 @@ class PostRepository:
         )
 
         return result.scalars().all()
-    
-    async def get_latest_with_author(self) -> list[Post] | None:
+
+    async def get_latest_with_author(self) -> Sequence[Post]:
         result = await self.session.execute(
             select(Post)
             .order_by(Post.created_at.desc(), Post.id.desc())
             .limit(settings.posts_preload)
-            .options(
-                joinedload(Post.author)
-            )
+            .options(joinedload(Post.author))
         )
 
         return result.scalars().all()
-    
-    async def get_latest_with_comments(self) -> list[Post] | None:
+
+    async def get_latest_with_comments(self) -> Sequence[Post]:
         post_subquery = (
             select(Post)
             .order_by(Post.created_at.desc(), Post.id.desc())
@@ -156,15 +147,16 @@ class PostRepository:
             .limit(settings.comments_preloaded + 1)
             .lateral()
         )
-        
+
         comment_alias = aliased(Comment, comment_lateral)
 
         result = await self.session.execute(
             select(post_alias)
             .outerjoin(comment_lateral, true())
             .options(
-                contains_eager(post_alias.comments.of_type(comment_alias))
-                .selectinload(comment_alias.author),
+                contains_eager(post_alias.comments.of_type(comment_alias)).selectinload(
+                    comment_alias.author
+                ),
                 selectinload(post_alias.author),
             )
             .order_by(post_alias.created_at.desc(), post_alias.id.desc())
@@ -179,7 +171,6 @@ class PostRepository:
         content: str,
         author_id: int,
     ) -> Post:
-
         post = Post(
             title=title,
             content=content,

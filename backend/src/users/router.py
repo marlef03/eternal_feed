@@ -1,16 +1,14 @@
 from fastapi import APIRouter, Depends, Response, status
 
-from src.users.schemas import UserCreate, UserResponse, NewUserResponse
-from src.users.service import UserService
-from src.users.models import User
-from src.users.dependencies import get_current_user, get_user_service
-
 from src.auth.dependencies import get_auth_service
-from src.auth.service import AuthService
 from src.auth.schemas import TokenResponse
-
+from src.auth.service import AuthService
 from src.core.config import settings
-from src.core.exceptions import UsernameIsTakenError, EmailIsTakenError
+from src.core.exceptions import EmailIsTakenError, UsernameIsTakenError
+from src.users.dependencies import get_current_user, get_user_service
+from src.users.models import User
+from src.users.schemas import NewUserResponse, UserCreate, UserResponse
+from src.users.service import UserService
 
 router = APIRouter(
     prefix="/users",
@@ -46,7 +44,7 @@ async def create_user(
         user_data=user,
         token=TokenResponse(
             access_token=access_token,
-        )
+        ),
     )
 
 
@@ -65,11 +63,14 @@ async def get_me(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def does_exist(
-    username: str = None,
-    email: str = None,
+    username: str | None = None,
+    email: str | None = None,
     service: UserService = Depends(get_user_service),
 ):
-    if username is not None and await service.get_user_by_username(username) is not None:
+    if (
+        username is not None
+        and await service.get_user_by_username(username) is not None
+    ):
         raise UsernameIsTakenError()
 
     if email is not None and await service.get_user_by_email(email) is not None:
@@ -80,10 +81,7 @@ async def does_exist(
     "/{user_id}",
     response_model=UserResponse,
 )
-async def get_user(
-    user_id: int,
-    service: UserService = Depends(get_user_service)
-):
+async def get_user(user_id: int, service: UserService = Depends(get_user_service)):
     return await service.get_user_or_raise(user_id)
 
 

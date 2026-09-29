@@ -2,16 +2,15 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, status
 
+from src.auth.dependencies import get_current_user_id
+from src.comments.dependencies import get_comment_service
 from src.comments.schemas import (
     CommentCreate,
     CommentResponse,
-    CommentWithAuthorResponse,
     CommentsResponse,
+    CommentWithAuthorResponse,
 )
 from src.comments.service import CommentService
-from src.comments.dependencies import get_comment_service
-
-from src.auth.dependencies import get_current_user_id
 
 router = APIRouter(tags=["comments"])
 

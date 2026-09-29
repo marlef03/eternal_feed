@@ -1,12 +1,21 @@
+from collections.abc import Sequence
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, status
-
-from src.posts.schemas import PostCreate, PostResponse, PostWithAuthorResponse, PostWithCommentsResponse
-from src.posts.service import PostService
-from src.posts.dependencies import get_post_service
+from redis.asyncio import Redis
 
 from src.auth.dependencies import get_current_user_id
+from src.core.config import settings
+from src.events.dependencies import get_redis
+from src.posts.dependencies import get_post_service
+from src.posts.schemas import (
+    PostCreate,
+    PostWithAuthorResponse,
+    PostWithCommentsResponse,
+)
+from src.posts.service import PostService
+from src.users.dependencies import get_current_user
+from src.users.models import User
 
 router = APIRouter(
     prefix="/posts",
@@ -16,23 +25,35 @@ router = APIRouter(
 
 @router.post(
     "",
-    response_model=PostResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_post(
     data: PostCreate,
     service: PostService = Depends(get_post_service),
-    current_user_id: int = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
+    redis: Redis = Depends(get_redis),
 ):
-    return await service.create_post(
+    post = await service.create_post(
         data=data,
-        author_id=current_user_id,
+        author_id=current_user.id,
+    )
+
+    post.author = current_user
+
+    await redis.xadd(
+        settings.sse_stream_key,
+        {
+            "event": "post_created",
+            "data": PostWithAuthorResponse.model_validate(post).model_dump_json(),
+        },
+        maxlen=settings.sse_maxlen,
+        approximate=True,
     )
 
 
 @router.get(
     "",
-    response_model=list[PostWithCommentsResponse],
+    response_model=Sequence[PostWithCommentsResponse],
 )
 async def get_posts(
     before_timestamp: datetime | None = None,
@@ -43,8 +64,6 @@ async def get_posts(
         before_timestamp,
         before_id,
     )
-
-    
 
     return result
 

@@ -1,6 +1,8 @@
 from datetime import datetime
+from typing import cast
 
 from sqlalchemy import select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.refresh_sessions.models import RefreshSession
@@ -18,7 +20,6 @@ class RefreshSessionRepository:
         created_at: datetime,
         expires_at: datetime,
     ) -> RefreshSession:
-
         refresh_session = RefreshSession(
             user_id=user_id,
             token_hash=token_hash,
@@ -43,7 +44,7 @@ class RefreshSessionRepository:
         self,
         session_id: int,
         now: datetime,
-    ) -> None:
+    ) -> bool:
         stmt = (
             update(RefreshSession)
             .where(
@@ -54,6 +55,6 @@ class RefreshSessionRepository:
             .values(revoked_at=now)
         )
 
-        result = await self.session.execute(stmt)
+        result = cast(CursorResult, await self.session.execute(stmt))
 
         return result.rowcount == 1

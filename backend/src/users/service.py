@@ -16,7 +16,6 @@ class UserService:
         self,
         data: UserCreate,
     ) -> User:
-
         password_hash = hash_password(data.password)
 
         user = await self.repository.create(
@@ -36,40 +35,35 @@ class UserService:
         self,
         user_id: int,
     ) -> User | None:
-
         return await self.repository.get_by_id(user_id)
 
     async def get_user_or_raise(
         self,
         user_id: int,
     ) -> User:
-
         user = await self.repository.get_by_id(user_id)
 
         if user is None:
             raise UserNotFoundError()
 
         return user
-    
+
     async def get_user_by_username(
         self,
         username: str,
     ) -> User | None:
-        
         return await self.repository.get_by_username(username)
-    
+
     async def get_user_by_email(
         self,
         email: str,
     ) -> User | None:
-        
         return await self.repository.get_by_email(email)
 
     async def delete_user(
         self,
         user_id: int,
     ) -> None:
-
         user = await self.get_user_or_raise(user_id)
 
         await self.repository.delete(user)

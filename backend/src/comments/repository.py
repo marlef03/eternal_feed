@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 from datetime import datetime
 
-from sqlalchemy import select, or_, and_
-from sqlalchemy.orm import joinedload
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from src.comments.models import Comment
 
@@ -17,14 +18,12 @@ class CommentRepository:
         )
 
         return result.scalar_one_or_none()
-    
+
     async def get_by_id_with_author(self, comment_id: int) -> Comment | None:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.id == comment_id)
-            .options(
-                joinedload(Comment.author)
-            )
+            .options(joinedload(Comment.author))
         )
 
         return result.scalar_one_or_none()
@@ -35,8 +34,7 @@ class CommentRepository:
         timestamp: datetime,
         id: int,
         limit: int,
-    ) -> list[Comment] | None:
-        
+    ) -> Sequence[Comment]:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.post_id == post_id)
@@ -51,15 +49,14 @@ class CommentRepository:
         )
 
         return result.scalars().all()
-    
+
     async def get_before_with_author(
         self,
         post_id: int,
         timestamp: datetime,
         id: int,
         limit: int,
-    ) -> list[Comment] | None:
-        
+    ) -> Sequence[Comment]:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.post_id == post_id)
@@ -71,18 +68,16 @@ class CommentRepository:
             )
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(limit)
-            .options(
-                joinedload(Comment.author)
-            )
+            .options(joinedload(Comment.author))
         )
 
         return result.scalars().all()
-    
+
     async def get_latest(
         self,
         post_id: int,
         limit: int,
-    ) -> list[Comment] | None:
+    ) -> Sequence[Comment]:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.post_id == post_id)
@@ -91,20 +86,18 @@ class CommentRepository:
         )
 
         return result.scalars().all()
-    
+
     async def get_latest_with_author(
         self,
         post_id: int,
         limit: int,
-    ) -> list[Comment] | None:
+    ) -> Sequence[Comment]:
         result = await self.session.execute(
             select(Comment)
             .where(Comment.post_id == post_id)
             .order_by(Comment.created_at.desc(), Comment.id.desc())
             .limit(limit)
-            .options(
-                joinedload(Comment.author)
-            )
+            .options(joinedload(Comment.author))
         )
 
         return result.scalars().all()
@@ -116,7 +109,6 @@ class CommentRepository:
         author_id: int,
         post_id: int,
     ) -> Comment:
-
         comment = Comment(
             content=content,
             author_id=author_id,

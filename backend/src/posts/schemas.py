@@ -1,14 +1,11 @@
+from datetime import datetime
 from typing import Annotated
 
-from datetime import datetime
-
-from pydantic import BaseModel, ConfigDict, BeforeValidator
-
-from src.users.schemas import UserPublicResponse
+from pydantic import BaseModel, BeforeValidator, ConfigDict
 
 from src.comments.schemas import CommentsResponse
-
 from src.core.config import settings
+from src.users.schemas import UserPublicResponse
 
 
 class PostCreate(BaseModel):
@@ -39,7 +36,7 @@ def _format_comments(v):
     items = list(v)
 
     return {
-        "items": items[:settings.comments_preloaded], 
+        "items": items[: settings.comments_preloaded],
         "has_more": len(items) > (settings.comments_preloaded),
     }
 

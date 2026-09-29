@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -5,11 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.comments.models import Comment
 from src.comments.repository import CommentRepository
 from src.comments.schemas import CommentCreate
-from src.core.exceptions import CommentNotFoundError
-
 from src.core.config import settings
-
-from src.core.exceptions import WrongUserError
+from src.core.exceptions import CommentNotFoundError, WrongUserError
 
 
 class CommentService:
@@ -23,7 +21,6 @@ class CommentService:
         author_id: int,
         post_id: int,
     ) -> Comment:
-
         comment = await self.repository.create(
             content=data.content,
             author_id=author_id,
@@ -40,48 +37,43 @@ class CommentService:
         self,
         comment_id: int,
     ) -> Comment | None:
-
         return await self.repository.get_by_id(comment_id)
 
     async def get_comment_or_raise(
         self,
         comment_id: int,
     ) -> Comment:
-
         comment = await self.repository.get_by_id(comment_id)
 
         if comment is None:
             raise CommentNotFoundError()
 
         return comment
-    
+
     async def get_comment_with_author(
         self,
         comment_id: int,
     ) -> Comment | None:
-
         return await self.repository.get_by_id_with_author(comment_id)
 
     async def get_comment_with_author_or_raise(
         self,
         comment_id: int,
     ) -> Comment:
-
         result = await self.repository.get_by_id_with_author(comment_id)
 
         if result is None:
             raise CommentNotFoundError()
 
         return result
-    
+
     async def get_post_comments(
         self,
         post_id: int,
         before_timestamp: datetime | None,
         before_id: int | None,
-    ) -> tuple[list[Comment] | None, bool]:
-
-        if before_timestamp is None:
+    ) -> tuple[Sequence[Comment], bool]:
+        if before_timestamp is None or before_id is None:
             limit = settings.comments_preloaded
             result = await self.repository.get_latest(post_id, limit + 1)
         else:
@@ -94,15 +86,14 @@ class CommentService:
             )
 
         return result[:limit], len(result) > limit
-    
+
     async def get_post_comments_with_author(
         self,
         post_id: int,
         before_timestamp: datetime | None,
         before_id: int | None,
-    ) -> tuple[list[Comment] | None, bool]:
-
-        if before_timestamp is None:
+    ) -> tuple[Sequence[Comment], bool]:
+        if before_timestamp is None or before_id is None:
             limit = settings.comments_preloaded
             result = await self.repository.get_latest_with_author(post_id, limit + 1)
         else:
@@ -121,7 +112,6 @@ class CommentService:
         comment_id: int,
         current_user_id: int,
     ) -> None:
-
         comment = await self.get_comment_or_raise(comment_id)
 
         if comment.author_id != current_user_id:

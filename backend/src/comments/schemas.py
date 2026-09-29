@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
@@ -11,7 +12,7 @@ class CommentCreate(BaseModel):
 
 class CommentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     content: str
     created_at: datetime
@@ -27,5 +28,5 @@ class CommentWithAuthorResponse(BaseModel):
 
 
 class CommentsResponse(BaseModel):
-    items: list[CommentWithAuthorResponse]
+    items: Sequence[CommentWithAuthorResponse]
     has_more: bool
