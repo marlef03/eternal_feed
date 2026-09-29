@@ -6,31 +6,36 @@ from src.auth.dependencies import get_current_user_id
 from src.comments.dependencies import get_comment_service
 from src.comments.schemas import (
     CommentCreate,
-    CommentResponse,
     CommentsResponse,
     CommentWithAuthorResponse,
 )
 from src.comments.service import CommentService
+from src.users.dependencies import get_current_user
+from src.users.models import User
 
 router = APIRouter(tags=["comments"])
 
 
 @router.post(
     "/posts/{post_id}/comments",
-    response_model=CommentResponse,
+    response_model=CommentWithAuthorResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_comment(
     post_id: int,
     data: CommentCreate,
     service: CommentService = Depends(get_comment_service),
-    current_user_id: int = Depends(get_current_user_id),
+    current_user: User = Depends(get_current_user),
 ):
-    return await service.create_comment(
+    comment = await service.create_comment(
         data=data,
-        author_id=current_user_id,
+        author_id=current_user.id,
         post_id=post_id,
     )
+
+    comment.author = current_user
+
+    return comment
 
 
 @router.get(

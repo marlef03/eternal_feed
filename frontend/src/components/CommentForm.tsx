@@ -6,7 +6,6 @@ import {
   type CommentsData,
   commentCreateResponseToData,
 } from "../interfaces/Comment";
-import type { UserData } from "../interfaces/User";
 import apiClient from "../util/apiClient";
 import { useAuthStatus } from "../util/authStatus";
 
@@ -26,18 +25,7 @@ function CommentForm({ postId }: { postId: number }) {
   const { mutate, isPending, isError, isSuccess } = useMutation({
     mutationFn: (data: CommentCreate) => createComment(postId, data),
     onSuccess: (newCommentResponse: CommentResponse) => {
-      const authorData: UserData | undefined = queryClient.getQueryData([
-        "user",
-      ]);
-
-      if (!authorData) {
-        return; // TODO: change to refetch
-      }
-
-      const newComment = commentCreateResponseToData(
-        newCommentResponse,
-        authorData,
-      );
+      const newComment = commentCreateResponseToData(newCommentResponse);
 
       queryClient.setQueryData(
         ["comments", postId],

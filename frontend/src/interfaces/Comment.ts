@@ -54,12 +54,11 @@ export function commentsResponseToData(
 
 export function commentCreateResponseToData(
   response: CommentResponse,
-  author: AuthorData,
 ): CommentData {
   return {
     id: response.id,
     content: response.content,
     createdAt: new Date(response.created_at),
-    author,
+    author: authorResponseToData(response.author),
   };
 }
