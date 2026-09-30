@@ -87,25 +87,39 @@ class CommentService:
 
         return result[:limit], len(result) > limit
 
-    async def get_post_comments_with_author(
+    async def get_post_comments_with_author_before(
         self,
         post_id: int,
-        before_timestamp: datetime | None,
-        before_id: int | None,
+        timestamp: datetime | None,
+        id: int | None,
     ) -> tuple[Sequence[Comment], bool]:
-        if before_timestamp is None or before_id is None:
+        if timestamp is None or id is None:
             limit = settings.comments_preloaded
             result = await self.repository.get_latest_with_author(post_id, limit + 1)
         else:
             limit = settings.comments_per_update
             result = await self.repository.get_before_with_author(
                 post_id,
-                before_timestamp,
-                before_id,
+                timestamp,
+                id,
                 limit + 1,
             )
 
         return result[:limit], len(result) > limit
+
+    async def get_post_comments_with_author_after(
+        self,
+        post_id: int,
+        timestamp: datetime,
+        id: int,
+    ) -> Sequence[Comment]:
+        result = await self.repository.get_after_with_author(
+            post_id,
+            timestamp,
+            id,
+        )
+
+        return result
 
     async def delete_comment(
         self,

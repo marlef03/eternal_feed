@@ -73,6 +73,47 @@ class CommentRepository:
 
         return result.scalars().all()
 
+    async def get_after(
+        self,
+        post_id: int,
+        timestamp: datetime,
+        id: int,
+    ) -> Sequence[Comment]:
+        result = await self.session.execute(
+            select(Comment)
+            .where(Comment.post_id == post_id)
+            .where(
+                or_(
+                    Comment.created_at > timestamp,
+                    and_(Comment.created_at == timestamp, Comment.id > id),
+                )
+            )
+            .order_by(Comment.created_at.desc(), Comment.id.desc())
+        )
+
+        return result.scalars().all()
+
+    async def get_after_with_author(
+        self,
+        post_id: int,
+        timestamp: datetime,
+        id: int,
+    ) -> Sequence[Comment]:
+        result = await self.session.execute(
+            select(Comment)
+            .where(Comment.post_id == post_id)
+            .where(
+                or_(
+                    Comment.created_at > timestamp,
+                    and_(Comment.created_at == timestamp, Comment.id > id),
+                )
+            )
+            .order_by(Comment.created_at.desc(), Comment.id.desc())
+            .options(joinedload(Comment.author))
+        )
+
+        return result.scalars().all()
+
     async def get_latest(
         self,
         post_id: int,

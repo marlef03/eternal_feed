@@ -44,15 +44,25 @@ async def create_comment(
 )
 async def get_comments(
     post_id: int,
+    after_timestamp: datetime | None = None,
+    after_id: int | None = None,
     before_timestamp: datetime | None = None,
     before_id: int | None = None,
     service: CommentService = Depends(get_comment_service),
 ):
-    comments, has_more = await service.get_post_comments_with_author(
-        post_id,
-        before_timestamp,
-        before_id,
-    )
+    if after_timestamp and after_id:
+        comments = await service.get_post_comments_with_author_after(
+            post_id,
+            after_timestamp,
+            after_id,
+        )
+        has_more = True
+    else:
+        comments, has_more = await service.get_post_comments_with_author_before(
+            post_id,
+            before_timestamp,
+            before_id,
+        )
 
     return CommentsResponse(
         items=comments,
