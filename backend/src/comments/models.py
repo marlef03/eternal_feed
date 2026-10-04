@@ -4,11 +4,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    DateTime,
     ForeignKey,
     Text,
     func,
 )
+from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.base import Base
@@ -43,7 +43,7 @@ class Comment(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        TIMESTAMP(timezone=True, precision=3),
         server_default=func.now(),
         nullable=False,
     )
