@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     comments_preloaded: int = 3
 
     model_config = {
-        "env_file": ".env",
+        "env_file": "backend.env",
     }
 
 
