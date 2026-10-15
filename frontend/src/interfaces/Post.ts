@@ -37,6 +37,10 @@ export interface PostData {
   comments: CommentsData;
 }
 
+export interface PostCountResponse {
+  count: number;
+}
+
 export function postResponseToData(response: PostResponse): PostData {
   return {
     id: response.id,

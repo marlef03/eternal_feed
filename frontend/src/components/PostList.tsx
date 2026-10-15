@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect, useRef, useState } from "react";
 import {
+  type PostCountResponse,
   type PostData,
   type PostResponse,
   postCreateResponseToData,
@@ -11,6 +12,8 @@ import eventSourceStore from "../util/eventSourceStore";
 import Post from "./Post";
 import ScrollObserver from "./ScrollObserver";
 import Transition from "./Transition";
+import NewPostCount from './NewPostCount';
+import PostForm from './PostForm';
 
 async function fetchPosts({ pageParam }): Promise<PostData[]> {
   let data: PostResponse[];
@@ -49,27 +52,95 @@ function PostList() {
     },
   });
 
-  useEffect(() => {
-    if (eventSourceStore.get() == null) {
-      eventSourceStore.connect();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRefreshError, setIsRefreshError] = useState(false);
+
+  const [newPostCount, setNewPostCount] = useState(0);
+
+  const [onTop, setOnTop] = useState(true);
+
+  async function fetchNewPosts(
+    afterTimestamp?: string,
+    afterId?: number,
+  ) {
+    let data: PostResponse[];
+    try {
+      setIsRefreshing(true)
+      if (afterTimestamp != undefined && afterId != undefined) {
+        data = (
+          await apiClient.get(`/posts?after_timestamp=${afterTimestamp}&after_id=${afterId}`)
+        ).data;
+      } else {
+        data = (await apiClient.get("/posts")).data;
+      }
+    } catch {
+      setIsRefreshError(true);
+      return;
+    } finally {
+      setIsRefreshing(false);
     }
 
-    eventSourceStore.get()?.addEventListener("post_created", (event) => {
-      const newPost = postCreateResponseToData(JSON.parse(event.data));
+    if (data) {
+      queryClient.setQueryData(['posts'], (old: {pages: PostData[][], pageParams: {beforeTimestamp: string, beforeId: number}[]}) => ({
+        ...old,
+        pages: old.pages.map((page, idx) => idx === 0 ? [...data.map((post) => postResponseToData(post)), ...page] : page)
+      }));
+    }
 
-      if (!eventSourceStore.seenPost(newPost.id)) {
-        queryClient.setQueryData(
-          ["posts"],
-          (old: { pageParams: unknown[]; pages: PostData[][] }) => ({
-            ...old,
-            pages: old.pages.map((page, idx) =>
-              idx === 0 ? [newPost, ...page] : page,
-            ),
-          }),
-        );
+    setNewPostCount(0);
+  }
+
+  async function fetchNewPostCount(
+    afterTimestamp?: string,
+    afterId?: number,
+  ) {
+    let data: PostCountResponse;
+    try {
+      if (afterTimestamp != undefined && afterId != undefined) {
+        data = (
+          await apiClient.get(`/posts/new-count?after_timestamp=${afterTimestamp}&after_id=${afterId}`)
+        ).data;
+      } else {
+        data = (await apiClient.get("/posts/new-count")).data;
       }
-    });
-  });
+    } catch {
+      return;
+    }
+
+    setNewPostCount(data.count);
+  }
+
+  async function fetchPostsByTimestamp() {
+    if (data && data.pages[0].length > 0) {
+      await fetchNewPosts(
+        data.pages[0][0].createdAt.toISOString(),
+        data.pages[0][0].id,
+      );
+    } else {
+      await fetchNewPosts();
+    }
+  }
+
+  useEffect(() => {
+    const intId = setInterval(async () => {
+      if (onTop) {
+        fetchPostsByTimestamp();
+      } else {
+        if (data && data.pages[0].length > 0) {
+          await fetchNewPostCount(
+            data.pages[0][0].createdAt.toISOString(),
+            data.pages[0][0].id,
+          );
+        } else {
+          await fetchNewPostCount();
+        }
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(intId);
+    }
+  }, [data, onTop]);
 
   const posts: ReactElement[] = [];
 
@@ -109,18 +180,27 @@ function PostList() {
 
   return (
     <div>
+      <PostForm fetchNewPosts={fetchPostsByTimestamp}/>
+      <ScrollObserver
+        onEnter={() => setOnTop(true)}
+        onExit={() => setOnTop(false)}
+      />
       {posts}
-      {isFetching && (
+      {(isFetching || isRefreshing) && (
         <div className="text-center bg-mist-100 dark:bg-mist-800 rounded-xl p-1 not-first:mt-2">
           Загрузка постов...
         </div>
       )}
-      {isError && (
+      {(isError || isRefreshError) && (
         <div className="text-center bg-red-200 dark:bg-red-950 rounded-xl p-1 not-first:mt-2">
           Ошибка загрузки постов
         </div>
       )}
-      {!isFetching && <ScrollObserver handler={fetchNextPage} />}
+      {!isFetching && <ScrollObserver onEnter={fetchNextPage} />}
+      <NewPostCount
+        count={newPostCount}
+        fetchNewPosts={fetchPostsByTimestamp}
+      />
     </div>
   );
 }

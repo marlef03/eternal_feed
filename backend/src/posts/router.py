@@ -2,13 +2,11 @@ from collections.abc import Sequence
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, status
-from redis.asyncio import Redis
 
 from src.auth.dependencies import get_current_user_id
-from src.core.config import settings
-from src.events.dependencies import get_redis
 from src.posts.dependencies import get_post_service
 from src.posts.schemas import (
+    PostCountResponse,
     PostCreate,
     PostWithAuthorResponse,
     PostWithCommentsResponse,
@@ -31,23 +29,10 @@ async def create_post(
     data: PostCreate,
     service: PostService = Depends(get_post_service),
     current_user: User = Depends(get_current_user),
-    redis: Redis = Depends(get_redis),
 ):
-    post = await service.create_post(
+    await service.create_post(
         data=data,
         author_id=current_user.id,
-    )
-
-    post.author = current_user
-
-    await redis.xadd(
-        settings.sse_stream_key,
-        {
-            "event": "post_created",
-            "data": PostWithAuthorResponse.model_validate(post).model_dump_json(),
-        },
-        maxlen=settings.sse_maxlen,
-        approximate=True,
     )
 
 
@@ -58,14 +43,30 @@ async def create_post(
 async def get_posts(
     before_timestamp: datetime | None = None,
     before_id: int | None = None,
+    after_timestamp: datetime | None = None,
+    after_id: int | None = None,
     service: PostService = Depends(get_post_service),
 ):
     result = await service.get_posts_with_comments(
         before_timestamp,
         before_id,
+        after_timestamp,
+        after_id,
     )
 
     return result
+
+
+@router.get(
+    "/new-count",
+    response_model=PostCountResponse,
+)
+async def get_new_posts_count(
+    after_timestamp: datetime | None,
+    after_id: int | None,
+    service: PostService = Depends(get_post_service),
+):
+    return {"count": await service.get_new_posts_count(after_timestamp, after_id)}
 
 
 @router.get(

@@ -1,6 +1,12 @@
 import React from "react";
 
-function ScrollObserver({ handler }: { handler: (() => void) | undefined }) {
+function ScrollObserver({
+  onEnter,
+  onExit,
+}: {
+  onEnter?: (() => void) | undefined,
+  onExit?: (() => void) | undefined,
+}) {
   const elemRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -9,7 +15,9 @@ function ScrollObserver({ handler }: { handler: (() => void) | undefined }) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          if (handler) handler();
+          if (onEnter) onEnter();
+        } else {
+          if (onExit) onExit();
         }
       },
       { threshold: 1.0 },
@@ -22,9 +30,9 @@ function ScrollObserver({ handler }: { handler: (() => void) | undefined }) {
     return () => {
       if (ref) observer.unobserve(ref);
     };
-  }, [handler]);
+  }, [onEnter, onExit]);
 
-  return <div ref={elemRef} style={{ height: "10px" }}></div>;
+  return <div ref={elemRef} style={{ height: "1px" }}></div>;
 }
 
 export default ScrollObserver;

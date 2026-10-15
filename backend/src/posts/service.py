@@ -31,6 +31,16 @@ class PostService:
 
         return post
 
+    async def get_new_posts_count(
+        self,
+        timestamp: datetime | None,
+        id: int | None,
+    ) -> int:
+        if timestamp is None or id is None:
+            return await self.repository.get_count()
+
+        return await self.repository.get_new_count(timestamp, id)
+
     async def get_post(
         self,
         post_id: int,
@@ -69,7 +79,12 @@ class PostService:
         self,
         before_timestamp: datetime | None,
         before_id: int | None,
+        after_timestamp: datetime | None,
+        after_id: int | None,
     ) -> Sequence[Post]:
+        if after_timestamp and after_id:
+            return await self.repository.get_after(after_timestamp, after_id)
+
         if before_timestamp is None or before_id is None:
             return await self.repository.get_latest()
 
@@ -82,7 +97,14 @@ class PostService:
         self,
         before_timestamp: datetime | None,
         before_id: int | None,
+        after_timestamp: datetime | None,
+        after_id: int | None,
     ) -> Sequence[Post]:
+        if after_timestamp and after_id:
+            return await self.repository.get_after_with_author(
+                after_timestamp, after_id
+            )
+
         if before_timestamp is None or before_id is None:
             return await self.repository.get_latest_with_author()
 
@@ -95,7 +117,14 @@ class PostService:
         self,
         before_timestamp: datetime | None,
         before_id: int | None,
+        after_timestamp: datetime | None,
+        after_id: int | None,
     ) -> Sequence[Post]:
+        if after_timestamp and after_id:
+            return await self.repository.get_after_with_comments(
+                after_timestamp, after_id
+            )
+
         if before_timestamp is None or before_id is None:
             return await self.repository.get_latest_with_comments()
 

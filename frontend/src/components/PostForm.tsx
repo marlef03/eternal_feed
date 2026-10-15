@@ -9,7 +9,9 @@ async function createPost(newPostData: PostCreate) {
   return (await apiClient.post("/posts", newPostData)).data;
 }
 
-function PostForm() {
+function PostForm({
+  fetchNewPosts,
+}) {
   const authed = useAuthStatus((state) => state.authed);
 
   const [isSuccess, setIsSuccess] = useState(false);
@@ -18,6 +20,7 @@ function PostForm() {
   const { mutate, isPending } = useMutation({
     mutationFn: createPost,
     onSuccess: () => {
+      fetchNewPosts();
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 2000);
     },

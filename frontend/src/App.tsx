@@ -21,7 +21,6 @@ function App() {
       <div className="max-lg:h-10 h-0 transition-all" />
       <div className="flex flex-col items-center">
         <div className="w-full max-w-2xl">
-          <PostForm />
           <PostList />
         </div>
       </div>

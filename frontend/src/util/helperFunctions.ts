@@ -26,3 +26,17 @@ export function doesIncludeLowercaseLetter(password: string) {
 export function doesIncludeProhibitedChars(password: string) {
   return /^.*[^a-zA-Z0-9].*$/.test(password);
 }
+
+export function formNewPostMessage(count: number) {
+  if (
+    11 <= count % 100 && count % 100 <= 19 ||
+    5 <= count % 10 && count % 10 <= 9 ||
+    count % 10 == 0
+  ) {
+    return count + " новых постов";
+  }
+  if (2 <= count % 10 && count % 10 <= 4) {
+    return count + " новых поста";
+  }
+  return count + " новый пост";
+}

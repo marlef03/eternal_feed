@@ -18,7 +18,15 @@ async function createComment(
     .data;
 }
 
-function CommentForm({ postId }: { postId: number }) {
+function CommentForm({
+  postId,
+  startPolling,
+  fetchCommentsAfter,
+}: {
+  postId: number,
+  startPolling: () => void,
+  fetchCommentsAfter: () => void,
+}) {
   const authed = useAuthStatus((state) => state.authed);
 
   const [isSuccess, setIsSuccess] = useState(false);
@@ -30,6 +38,10 @@ function CommentForm({ postId }: { postId: number }) {
     mutationFn: (data: CommentCreate) => createComment(postId, data),
     onSuccess: (newCommentResponse: CommentResponse) => {
       const newComment = commentCreateResponseToData(newCommentResponse);
+
+      startPolling();
+
+      fetchCommentsAfter();
 
       queryClient.setQueryData(
         ["comments", postId],

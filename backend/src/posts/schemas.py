@@ -50,3 +50,7 @@ class PostWithCommentsResponse(BaseModel):
     created_at: datetime
     author: UserPublicResponse
     comments: Annotated[CommentsResponse, BeforeValidator(_format_comments)]
+
+
+class PostCountResponse(BaseModel):
+    count: int
