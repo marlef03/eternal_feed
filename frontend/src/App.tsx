@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import PostList from "./components/PostList";
 import Profile from "./components/Profile";
+import ReloadButton from "./components/ReloadButton";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ function App() {
         </div>
       </div>
       <Profile />
+      <ReloadButton queryKey={["posts"]} />
     </QueryClientProvider>
   );
 }

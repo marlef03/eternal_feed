@@ -146,7 +146,7 @@ function PostList() {
           await fetchNewPostCount();
         }
       }
-    }, 1000);
+    }, 60000);
 
     return () => {
       clearInterval(intId);
