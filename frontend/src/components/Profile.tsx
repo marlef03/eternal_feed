@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import React from "react";
+import React, { useEffect } from "react";
 import useOutsideClick from "../hooks/useOutsideClick";
 import {
   type UserData,
@@ -31,7 +31,7 @@ function Profile() {
   const [open, setOpen] = React.useState(false);
   const [isLoginPage, setIsLoginPage] = React.useState(true);
 
-  const { data, isLoading } = useQuery<UserData>({
+  const { data, isLoading, isSuccess } = useQuery<UserData>({
     queryKey: ["user"],
     queryFn: getUser,
     retry: (failureCount, error) => {
@@ -41,6 +41,12 @@ function Profile() {
       return failureCount < 3;
     },
   });
+
+  useEffect(() => {
+    if (isSuccess && data) {
+      setOpen(false);
+    }
+  }, [isSuccess, data]);
 
   const {
     mutate: logout,
