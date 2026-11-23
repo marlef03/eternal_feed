@@ -1,9 +1,12 @@
-import Transition from './Transition';
-import { formNewPostMessage } from '../util/helperFunctions';
+import { formNewPostMessage } from "../util/helperFunctions";
+import Transition from "./Transition";
 
 function NewPostCount({
   count,
   fetchNewPosts,
+}: {
+  count: number;
+  fetchNewPosts: () => void;
 }) {
   function onPush() {
     document.documentElement.scrollIntoView({
@@ -15,7 +18,7 @@ function NewPostCount({
 
   return (
     <Transition
-      appear={ count > 0 }
+      appear={count > 0}
       onAppearStyle={{
         top: "0px",
         transitionProperty: "top",
@@ -40,11 +43,7 @@ function NewPostCount({
         mt-2
       "
     >
-      <button
-        onClick={onPush}
-      >
-        { formNewPostMessage(count) }
-      </button>
+      <button onClick={onPush}>{formNewPostMessage(count)}</button>
     </Transition>
   );
 }

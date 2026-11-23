@@ -2,13 +2,10 @@ import type { CommentProps } from "../interfaces/CommentProps";
 import { getDateString } from "../util/helperFunctions";
 
 function Comment({
-  id,
   content,
   createdAt,
-  authorId,
   authorDisplayName,
   authorUsername,
-  authorCreatedAt,
 }: CommentProps) {
   return (
     <div className="bg-mist-100 dark:bg-mist-800 rounded-xl p-1">

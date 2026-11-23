@@ -1,21 +1,26 @@
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactElement, useEffect, useRef, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 import {
   type PostCountResponse,
   type PostData,
   type PostResponse,
-  postCreateResponseToData,
   postResponseToData,
 } from "../interfaces/Post";
 import apiClient from "../util/apiClient";
-import eventSourceStore from "../util/eventSourceStore";
+import NewPostCount from "./NewPostCount";
 import Post from "./Post";
+import PostForm from "./PostForm";
 import ScrollObserver from "./ScrollObserver";
 import Transition from "./Transition";
-import NewPostCount from './NewPostCount';
-import PostForm from './PostForm';
 
-async function fetchPosts({ pageParam }): Promise<PostData[]> {
+async function fetchPosts({
+  pageParam,
+}: {
+  pageParam: {
+    beforeTimestamp?: string;
+    beforeId?: number;
+  };
+}): Promise<PostData[]> {
   let data: PostResponse[];
   if (pageParam.beforeTimestamp) {
     data = (
@@ -33,16 +38,14 @@ async function fetchPosts({ pageParam }): Promise<PostData[]> {
 function PostList() {
   const queryClient = useQueryClient();
 
-  const { data, fetchNextPage, isFetching, isError } = useInfiniteQuery<
-    PostData[]
-  >({
+  const { data, fetchNextPage, isFetching, isError } = useInfiniteQuery({
     queryKey: ["posts"],
     queryFn: fetchPosts,
     initialPageParam: {
-      beforeTimestamp: undefined,
-      beforeId: undefined,
+      beforeTimestamp: undefined as string | undefined,
+      beforeId: undefined as number | undefined,
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: PostData[]) => {
       if (lastPage.length === 0) return undefined;
 
       return {
@@ -59,16 +62,15 @@ function PostList() {
 
   const [onTop, setOnTop] = useState(true);
 
-  async function fetchNewPosts(
-    afterTimestamp?: string,
-    afterId?: number,
-  ) {
+  async function fetchNewPosts(afterTimestamp?: string, afterId?: number) {
     let data: PostResponse[];
     try {
-      setIsRefreshing(true)
-      if (afterTimestamp != undefined && afterId != undefined) {
+      setIsRefreshing(true);
+      if (afterTimestamp !== undefined && afterId !== undefined) {
         data = (
-          await apiClient.get(`/posts?after_timestamp=${afterTimestamp}&after_id=${afterId}`)
+          await apiClient.get(
+            `/posts?after_timestamp=${afterTimestamp}&after_id=${afterId}`,
+          )
         ).data;
       } else {
         data = (await apiClient.get("/posts")).data;
@@ -81,24 +83,33 @@ function PostList() {
     }
 
     if (data) {
-      queryClient.setQueryData(['posts'], (old: {pages: PostData[][], pageParams: {beforeTimestamp: string, beforeId: number}[]}) => ({
-        ...old,
-        pages: old.pages.map((page, idx) => idx === 0 ? [...data.map((post) => postResponseToData(post)), ...page] : page)
-      }));
+      queryClient.setQueryData(
+        ["posts"],
+        (old: {
+          pages: PostData[][];
+          pageParams: { beforeTimestamp?: string; beforeId?: number }[];
+        }) => ({
+          ...old,
+          pages: old.pages.map((page, idx) =>
+            idx === 0
+              ? [...data.map((post) => postResponseToData(post)), ...page]
+              : page,
+          ),
+        }),
+      );
     }
 
     setNewPostCount(0);
   }
 
-  async function fetchNewPostCount(
-    afterTimestamp?: string,
-    afterId?: number,
-  ) {
+  async function fetchNewPostCount(afterTimestamp?: string, afterId?: number) {
     let data: PostCountResponse;
     try {
-      if (afterTimestamp != undefined && afterId != undefined) {
+      if (afterTimestamp !== undefined && afterId !== undefined) {
         data = (
-          await apiClient.get(`/posts/new-count?after_timestamp=${afterTimestamp}&after_id=${afterId}`)
+          await apiClient.get(
+            `/posts/new-count?after_timestamp=${afterTimestamp}&after_id=${afterId}`,
+          )
         ).data;
       } else {
         data = (await apiClient.get("/posts/new-count")).data;
@@ -139,13 +150,13 @@ function PostList() {
 
     return () => {
       clearInterval(intId);
-    }
+    };
   }, [data, onTop]);
 
   const posts: ReactElement[] = [];
 
   if (data) {
-    data.pages.forEach((page) => {
+    data.pages.forEach((page: PostData[]) => {
       posts.push(
         ...page.map((post) => (
           <Transition
@@ -180,7 +191,7 @@ function PostList() {
 
   return (
     <div>
-      <PostForm fetchNewPosts={fetchPostsByTimestamp}/>
+      <PostForm fetchNewPosts={fetchPostsByTimestamp} />
       <ScrollObserver
         onEnter={() => setOnTop(true)}
         onExit={() => setOnTop(false)}

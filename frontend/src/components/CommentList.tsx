@@ -1,5 +1,10 @@
-import { QueryClient, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, type ReactElement, type RefObject } from "react";
+import {
+  type QueryClient,
+  type QueryFunctionContext,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { type ReactElement, useEffect, useRef } from "react";
 import {
   type CommentsData,
   type CommentsResponse,
@@ -11,7 +16,16 @@ import Comment from "./Comment";
 import CommentForm from "./CommentForm";
 import Transition from "./Transition";
 
-async function fetchComments({ pageParam, queryKey }): Promise<CommentsData> {
+async function fetchComments({
+  pageParam,
+  queryKey,
+}: QueryFunctionContext<
+  readonly (string | number)[],
+  {
+    beforeTimestamp: string | undefined;
+    beforeId: number | undefined;
+  }
+>): Promise<CommentsData> {
   let data: CommentsResponse;
   if (pageParam.beforeTimestamp) {
     data = (
@@ -26,35 +40,48 @@ async function fetchComments({ pageParam, queryKey }): Promise<CommentsData> {
   return commentsResponseToData(data);
 }
 
-async function fetchCommentsAfter(
-  queryClient: QueryClient,
-  postId: number,
-) {
+async function fetchCommentsAfter(queryClient: QueryClient, postId: number) {
   const queryData = queryClient.getQueryData<{
     pages: CommentsData[];
-  }>(['comments', postId]);
+  }>(["comments", postId]);
 
-  if (!queryData || queryData.pages.length == 0 || queryData.pages[0].items.length == 0) return;
+  if (
+    !queryData ||
+    queryData.pages.length === 0 ||
+    queryData.pages[0].items.length === 0
+  )
+    return;
 
   const timestamp = queryData.pages[0].items[0].createdAt.toISOString();
   const id = queryData.pages[0].items[0].id;
 
-  const data: CommentsResponse = (await apiClient.get(
-    `/posts/${postId}/comments?after_timestamp=${timestamp}&after_id=${id}`,
-  )).data;
+  const data: CommentsResponse = (
+    await apiClient.get(
+      `/posts/${postId}/comments?after_timestamp=${timestamp}&after_id=${id}`,
+    )
+  ).data;
 
-  if (data.items.length == 0) return;
+  if (data.items.length === 0) return;
 
   queryClient.setQueryData(
     ["comments", postId],
-    (old: { pageParams: unknown[]; pages: CommentsData[] }) => {
+    (old: {
+      pageParams: {
+        beforeTimestamp: string | undefined;
+        beforeId: number | undefined;
+      }[];
+      pages: CommentsData[];
+    }) => {
       if (!old) return old;
 
       return {
         ...old,
         pages: old.pages.map((page, idx) =>
           idx === 0
-            ? { ...page, items: [...commentsResponseToData(data).items, ...page.items] }
+            ? {
+                ...page,
+                items: [...commentsResponseToData(data).items, ...page.items],
+              }
             : page,
         ),
       };
@@ -68,24 +95,24 @@ function CommentList({ postId, preloadedComments }: CommentListProps) {
   const queryClient = useQueryClient();
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetched, status } =
-    useInfiniteQuery<CommentsData>({
+    useInfiniteQuery({
       queryKey: ["comments", postId],
       queryFn: fetchComments,
       initialPageParam: {
-        beforeTimestamp: undefined,
-        beforeId: undefined,
+        beforeTimestamp: undefined as string | undefined,
+        beforeId: undefined as number | undefined,
       },
       initialData: {
         pageParams: [
           {
-            beforeTimestap: undefined,
-            beforeId: undefined,
+            beforeTimestamp: undefined as string | undefined,
+            beforeId: undefined as number | undefined,
           },
         ],
         pages: [preloadedComments],
       },
       staleTime: Infinity,
-      getNextPageParam: (lastPage) => {
+      getNextPageParam: (lastPage: CommentsData) => {
         if (!lastPage.hasMore) return undefined;
 
         return {
@@ -105,8 +132,10 @@ function CommentList({ postId, preloadedComments }: CommentListProps) {
 
   function startPolling() {
     if (!pollingIntervalId.current) {
-      pollingIntervalId.current = setInterval(() =>
-        fetchCommentsAfter(queryClient, postId), 5000);
+      pollingIntervalId.current = setInterval(
+        () => fetchCommentsAfter(queryClient, postId),
+        5000,
+      );
     }
   }
 
@@ -119,7 +148,7 @@ function CommentList({ postId, preloadedComments }: CommentListProps) {
   const comments: ReactElement[] = [];
 
   if (data) {
-    data.pages.forEach((page) => {
+    data.pages.forEach((page: CommentsData) => {
       comments.push(
         ...page.items.map((comment) => (
           <Transition

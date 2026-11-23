@@ -7,10 +7,8 @@ function Post({
   title,
   content,
   createdAt,
-  authorId,
   authorDisplayName,
   authorUsername,
-  authorCreatedAt,
   comments,
 }: PostProps) {
   return (

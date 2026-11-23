@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  type QueryClient,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import React, { useState } from "react";
 import {
   type CommentCreate,
@@ -23,9 +27,12 @@ function CommentForm({
   startPolling,
   fetchCommentsAfter,
 }: {
-  postId: number,
-  startPolling: () => void,
-  fetchCommentsAfter: () => void,
+  postId: number;
+  startPolling: () => void;
+  fetchCommentsAfter: (
+    queryClient: QueryClient,
+    postId: number,
+  ) => Promise<void>;
 }) {
   const authed = useAuthStatus((state) => state.authed);
 
@@ -41,7 +48,7 @@ function CommentForm({
 
       startPolling();
 
-      fetchCommentsAfter();
+      fetchCommentsAfter(queryClient, postId);
 
       queryClient.setQueryData(
         ["comments", postId],
@@ -103,7 +110,7 @@ function CommentForm({
 
   function handleContentChange(event: React.ChangeEvent) {
     setContent((event.target as HTMLTextAreaElement).value);
-    setFormErrors((old) => ({ ...old, content: false }));
+    setFormErrors((old: { content: boolean }) => ({ ...old, content: false }));
   }
 
   return (

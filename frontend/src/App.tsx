@@ -1,5 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import PostForm from "./components/PostForm";
 import PostList from "./components/PostList";
 import Profile from "./components/Profile";
 

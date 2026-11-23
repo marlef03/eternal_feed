@@ -9,9 +9,7 @@ async function createPost(newPostData: PostCreate) {
   return (await apiClient.post("/posts", newPostData)).data;
 }
 
-function PostForm({
-  fetchNewPosts,
-}) {
+function PostForm({ fetchNewPosts }: { fetchNewPosts: () => void }) {
   const authed = useAuthStatus((state) => state.authed);
 
   const [isSuccess, setIsSuccess] = useState(false);
