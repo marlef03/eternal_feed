@@ -26,7 +26,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - pg_data:/var/lib/postgresql/MAJOR/docker
+      - pg_data:/var/lib/postgresql
     ports:
       - "5432:5432"
     networks:
