@@ -23,9 +23,5 @@ class Settings(BaseSettings):
     comments_per_update: int = 5
     comments_preloaded: int = 3
 
-    model_config = {
-        "env_file": "backend.env",
-    }
-
 
 settings = Settings()

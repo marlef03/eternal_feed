@@ -1,3 +1,5 @@
+import os
+
 from logging.config import fileConfig
 
 from sqlalchemy import pool
@@ -5,7 +7,6 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from src.core.config import settings
 from src.database.base import Base
 
 # Import models to include them in Base.metadata
@@ -14,6 +15,10 @@ from src.posts.models import Post
 from src.comments.models import Comment
 from src.auth.refresh_sessions.models import RefreshSession
 
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL is None:
+    raise Exception('DATABASE_URL environment variable is not set')
 
 config = context.config
 
@@ -24,7 +29,7 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    url = settings.database_url
+    url = DATABASE_URL
 
     context.configure(
         url=url,
@@ -52,7 +57,10 @@ async def run_async_migrations() -> None:
         config.config_ini_section,
     )
 
-    configuration["sqlalchemy.url"] = settings.database_url
+    if configuration is None:
+        raise Exception('failed to create async migrations configuration')
+
+    configuration["sqlalchemy.url"] = DATABASE_URL
 
     connectable = async_engine_from_config(
         configuration,
