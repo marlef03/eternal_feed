@@ -16,7 +16,6 @@ dependencies = [
     "sqlalchemy>=2.0.52",
     "uvicorn>=0.52.4",
     "python-multipart>=0.0.32",
-    "redis[hiredis]>=8.1.0",
 ]
 
 [dependency-groups]

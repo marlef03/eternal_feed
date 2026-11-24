@@ -2,7 +2,6 @@ from fastapi import APIRouter
 
 from src.auth.router import router as auth_router
 from src.comments.router import router as comments_router
-from src.events.router import router as event_router
 from src.posts.router import router as posts_router
 from src.users.router import router as users_router
 
@@ -12,4 +11,3 @@ api_router.include_router(users_router)
 api_router.include_router(posts_router)
 api_router.include_router(comments_router)
 api_router.include_router(auth_router)
-api_router.include_router(event_router)
