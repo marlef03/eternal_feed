@@ -27,7 +27,7 @@ function Transition({
           setExists(false);
           setInit(true);
         }
-        setTimeout(() => {
+        appearTimeoutId.current = setTimeout(() => {
           setExists(true);
           setTimeout(() => setInit(false), 0);
         }, delay);
