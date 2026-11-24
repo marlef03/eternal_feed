@@ -2,9 +2,8 @@ import {
   type QueryClient,
   type QueryFunctionContext,
   useInfiniteQuery,
-  useQueryClient,
 } from "@tanstack/react-query";
-import { type ReactElement, useEffect, useRef } from "react";
+import type { ReactElement } from "react";
 import {
   type CommentsData,
   type CommentsResponse,
@@ -90,10 +89,6 @@ async function fetchCommentsAfter(queryClient: QueryClient, postId: number) {
 }
 
 function CommentList({ postId, preloadedComments }: CommentListProps) {
-  const pollingIntervalId = useRef<number>(null);
-
-  const queryClient = useQueryClient();
-
   const { data, fetchNextPage, hasNextPage, isFetching, isFetched, status } =
     useInfiniteQuery({
       queryKey: ["comments", postId],
@@ -121,29 +116,6 @@ function CommentList({ postId, preloadedComments }: CommentListProps) {
         };
       },
     });
-
-  useEffect(() => {
-    return () => {
-      if (pollingIntervalId.current) {
-        clearInterval(pollingIntervalId.current);
-      }
-    };
-  }, []);
-
-  function startPolling() {
-    if (!pollingIntervalId.current) {
-      pollingIntervalId.current = setInterval(
-        () => fetchCommentsAfter(queryClient, postId),
-        5000,
-      );
-    }
-  }
-
-  function handleFetch() {
-    startPolling();
-
-    fetchNextPage();
-  }
 
   const comments: ReactElement[] = [];
 
@@ -182,11 +154,7 @@ function CommentList({ postId, preloadedComments }: CommentListProps) {
 
   return (
     <div>
-      <CommentForm
-        postId={postId}
-        startPolling={startPolling}
-        fetchCommentsAfter={fetchCommentsAfter}
-      />
+      <CommentForm postId={postId} fetchCommentsAfter={fetchCommentsAfter} />
       {data.pages[0].items.length === 0 && (
         <div
           className="
@@ -216,7 +184,7 @@ function CommentList({ postId, preloadedComments }: CommentListProps) {
         (hasNextPage && !isFetching)) && (
         <button
           type="button"
-          onClick={handleFetch}
+          onClick={() => fetchNextPage()}
           className="
             w-full
             text-center

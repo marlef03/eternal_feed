@@ -1,6 +1,7 @@
 import type { PostProps } from "../interfaces/PostProps";
 import { getDateString } from "../util/helperFunctions";
 import CommentList from "./CommentList";
+import ReloadButton from "./ReloadButton";
 
 function Post({
   id,
@@ -21,7 +22,19 @@ function Post({
         <h2>{title}</h2>
         <pre>{content}</pre>
       </div>
-      <div className="p-1 bg-mist-200 dark:bg-mist-700 rounded-2xl">
+      <div className="relative p-1 bg-mist-200 dark:bg-mist-700 rounded-2xl">
+        <ReloadButton
+          queryKeys={[["comments", id]]}
+          className="
+            absolute
+            right-0
+            top-0
+            mt-0.5
+            mr-0.5
+            size-8
+          "
+          title="Обновить комментарии"
+        />
         <div className="text-center p-1 mb-1">Комментарии</div>
         <CommentList postId={id} preloadedComments={comments} />
       </div>

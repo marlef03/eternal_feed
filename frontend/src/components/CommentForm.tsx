@@ -4,12 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import React, { useState } from "react";
-import {
-  type CommentCreate,
-  type CommentResponse,
-  type CommentsData,
-  commentCreateResponseToData,
-} from "../interfaces/Comment";
+import type { CommentCreate, CommentResponse } from "../interfaces/Comment";
 import apiClient from "../util/apiClient";
 import { useAuthStatus } from "../util/authStatus";
 import Transition from "./Transition";
@@ -24,11 +19,9 @@ async function createComment(
 
 function CommentForm({
   postId,
-  startPolling,
   fetchCommentsAfter,
 }: {
   postId: number;
-  startPolling: () => void;
   fetchCommentsAfter: (
     queryClient: QueryClient,
     postId: number,
@@ -43,28 +36,8 @@ function CommentForm({
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: CommentCreate) => createComment(postId, data),
-    onSuccess: (newCommentResponse: CommentResponse) => {
-      const newComment = commentCreateResponseToData(newCommentResponse);
-
-      startPolling();
-
+    onSuccess: () => {
       fetchCommentsAfter(queryClient, postId);
-
-      queryClient.setQueryData(
-        ["comments", postId],
-        (old: { pageParams: unknown[]; pages: CommentsData[] }) => {
-          if (!old) return old;
-
-          return {
-            ...old,
-            pages: old.pages.map((page, idx) =>
-              idx === 0
-                ? { ...page, items: [newComment, ...page.items] }
-                : page,
-            ),
-          };
-        },
-      );
 
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 2000);

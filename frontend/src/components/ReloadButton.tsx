@@ -1,56 +1,97 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+import {
+  type Query,
+  type QueryClient,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+
+function buildPredicate(queryKeys: ((string | number)[] | string)[]) {
+  return (query: Query) =>
+    queryKeys.some((key) => {
+      if (Array.isArray(key)) {
+        return (
+          key.length === query.queryKey.length &&
+          key.every((v, i) => v === query.queryKey[i])
+        );
+      }
+      return key === query.queryKey[0];
+    });
+}
 
 async function reload(
   queryClient: QueryClient,
-  queryKey: (string | number)[],
+  queryKeys: ((string | number)[] | string)[],
   setIsUpdating: (isUpdating: boolean) => void,
 ) {
   setIsUpdating(true);
-  await queryClient.resetQueries({ queryKey: queryKey });
-  setIsUpdating(false);
+  try {
+    const predicate = buildPredicate(queryKeys);
+
+    await queryClient.resetQueries({ predicate });
+
+    const pending = queryClient
+      .getQueryCache()
+      .findAll({ predicate })
+      .map((q) => q.promise)
+      .filter((p): p is Promise<void> => Boolean(p));
+
+    await Promise.all(pending);
+  } finally {
+    setIsUpdating(false);
+  }
 }
 
-function ReloadButton({ queryKey }: { queryKey: (string | number)[] }) {
+function ReloadButton({
+  queryKeys,
+  className,
+  title,
+}: {
+  queryKeys: ((string | number)[] | string)[];
+  className: string;
+  title: string;
+}) {
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
   const [angle, setAngle] = useState(0);
 
   useEffect(() => {
-    if (isUpdating) {
-      setAngle(angle + 0.0001);
-    } else if (!isUpdating && angle > 0) {
-      setAngle(0);
-    }
-  }, [angle, isUpdating]);
+    if (!isUpdating) return;
+    let raf: number;
+    const tick = () => {
+      setAngle((a) => a + 0.05);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [isUpdating]);
+
+  useEffect(() => {
+    if (!isUpdating) setAngle(0);
+  }, [isUpdating]);
 
   return (
     <button
-      title="Обновить стену"
-      className="
-        fixed
-        right-34.5
-        top-0
-        w-10
-        h-10
-        mt-1
+      title={title}
+      disabled={isUpdating}
+      className={`
+        ${className}
         cursor-pointer
+        disabled:cursor-default
         bg-mist-100
-        dark:bg-mist-800 
-        hover:bg-mist-200
-        dark:hover:bg-mist-700
-        border 
-        border-mist-400 
+        dark:bg-mist-800
+        enabled:hover:bg-mist-200
+        enabled:dark:hover:bg-mist-700
+        border
+        border-mist-400
         rounded-4xl
-        dark:border-mist-600 
-        p-2 
-        mb-1 
+        dark:border-mist-600
+        p-2
         shadow-md
         transition-all
-      "
+      `}
       type="button"
-      onClick={async () => await reload(queryClient, queryKey, setIsUpdating)}
+      onClick={() => reload(queryClient, queryKeys, setIsUpdating)}
     >
       <div
         className="flex justify-center items-center"
@@ -58,7 +99,7 @@ function ReloadButton({ queryKey }: { queryKey: (string | number)[] }) {
           rotate: `${angle}rad`,
         }}
       >
-        <ArrowPathIcon className="size-6" />
+        <ArrowPathIcon className="size-full" />
       </div>
     </button>
   );

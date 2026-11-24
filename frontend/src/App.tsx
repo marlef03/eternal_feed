@@ -25,7 +25,18 @@ function App() {
         </div>
       </div>
       <Profile />
-      <ReloadButton queryKey={["posts"]} />
+      <ReloadButton
+        queryKeys={["posts", "comments"]}
+        className="
+          fixed
+          right-34.5
+          top-0
+          w-10
+          h-10
+          mt-1
+        "
+        title="Обновить стену"
+      />
     </QueryClientProvider>
   );
 }
