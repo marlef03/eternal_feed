@@ -1,6 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.exceptions import UserNotFoundError
+from src.core.exceptions import (
+    EmailIsTakenError,
+    UsernameIsTakenError,
+    UserNotFoundError,
+)
 from src.core.security import hash_password
 from src.users.models import User
 from src.users.repository import UserRepository
@@ -16,6 +20,12 @@ class UserService:
         self,
         data: UserCreate,
     ) -> User:
+        if await self.repository.get_by_username(data.username) is not None:
+            raise UsernameIsTakenError()
+
+        if await self.repository.get_by_email(data.email) is not None:
+            raise EmailIsTakenError()
+
         password_hash = hash_password(data.password)
 
         user = await self.repository.create(
