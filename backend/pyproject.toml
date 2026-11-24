@@ -4,53 +4,40 @@ version = "0.1.0"
 description = "Backend service for eternal_feed web app"
 requires-python = ">=3.13"
 dependencies = [
-    "alembic>=1.19.1",
-    "asyncpg>=0.31.0",
-    "fastapi>=0.141.1",
-    "pillow>=12.3.0",
-    "pwdlib[argon2]>=0.3.1",
-    "pydantic[email]>=2.13.4",
-    "pydantic-settings>=2.15.0",
-    "pyjwt>=2.13.0",
-    "python-dotenv>=1.2.3",
-    "sqlalchemy>=2.0.52",
-    "uvicorn>=0.52.4",
-    "python-multipart>=0.0.32",
+  "alembic>=1.19.1",
+  "asyncpg>=0.31.0",
+  "fastapi>=0.141.1",
+  "pillow>=12.3.0",
+  "pwdlib[argon2]>=0.3.1",
+  "pydantic[email]>=2.13.4",
+  "pydantic-settings>=2.15.0",
+  "pyjwt>=2.13.0",
+  "python-dotenv>=1.2.3",
+  "sqlalchemy>=2.0.52",
+  "uvicorn>=0.52.4",
+  "python-multipart>=0.0.32",
+  "pytest-asyncio>=1.5.0",
+  "httpx>=0.28.1",
 ]
 
 [dependency-groups]
-dev = [
-    "mypy>=2.3.1",
-    "pre-commit>=4.6.2",
-    "pytest>=9.1.1",
-    "ruff>=0.16.5",
-]
+dev = ["mypy>=2.3.1", "pre-commit>=4.6.2", "pytest>=9.1.1", "ruff>=0.16.5"]
 
 [tool.ruff]
 line-length = 88
-exclude = [
-    "alembic/",
-]
+exclude = ["alembic/"]
 force-exclude = true
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends"]
 
 [tool.ruff.lint]
-select = [
-    "E",
-    "F",
-    "I",
-    "UP",
-]
+select = ["E", "F", "I", "UP"]
 ignore = []
 
 [tool.mypy]
 python_version = "3.13"
-plugins = [
-    "pydantic.mypy",
-    "sqlalchemy.ext.mypy.plugin",
-]
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 files = ["main.py", "src"]
 strict = false
 warn_return_any = true
@@ -61,3 +48,9 @@ init_forbid_extra = true
 init_typed = false
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+asyncio_default_test_loop_scope = "function"
+testpaths = ["tests"]
