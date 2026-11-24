@@ -130,7 +130,7 @@ The API is versioned under `/api/v1`.
 | Users | `GET /users/me` | Get the authenticated user |
 | Users | `GET /users/{user_id}` | Get a public user profile |
 | Users | `GET /users/exists` | Check username/email availability |
-| Users | DELETE /users/{user_id} | Delete a user (current user only) |
+| Users | `DELETE /users/{user_id}` | Delete a user (current user only) |
 | Auth | `POST /auth/login/email` | Login using email and password |
 | Auth | `POST /auth/login/username` | Login using username and password |
 | Auth | `POST /auth/token` | OAuth2 password-form login (Swagger Authorize) |
