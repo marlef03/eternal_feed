@@ -44,21 +44,23 @@ async function fetchCommentsAfter(queryClient: QueryClient, postId: number) {
     pages: CommentsData[];
   }>(["comments", postId]);
 
+  let data: CommentsResponse;
   if (
     !queryData ||
     queryData.pages.length === 0 ||
     queryData.pages[0].items.length === 0
-  )
-    return;
+  ) {
+    data = (await apiClient.get(`/posts/${postId}/comments`)).data;
+  } else {
+    const timestamp = queryData.pages[0].items[0].createdAt.toISOString();
+    const id = queryData.pages[0].items[0].id;
 
-  const timestamp = queryData.pages[0].items[0].createdAt.toISOString();
-  const id = queryData.pages[0].items[0].id;
-
-  const data: CommentsResponse = (
-    await apiClient.get(
-      `/posts/${postId}/comments?after_timestamp=${timestamp}&after_id=${id}`,
-    )
-  ).data;
+    data = (
+      await apiClient.get(
+        `/posts/${postId}/comments?after_timestamp=${timestamp}&after_id=${id}`,
+      )
+    ).data;
+  }
 
   if (data.items.length === 0) return;
 
