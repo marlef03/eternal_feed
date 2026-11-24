@@ -54,6 +54,14 @@ PostgreSQL healthy -> Alembic migrator -> Backend healthy -> Frontend
 
 The backend is organized by domain modules (`auth`, `users`, `posts`, `comments`). API routers delegate work to services, while services use repositories and an async SQLAlchemy session. The refresh-session records are stored separately from users and reference their owner.
 
+## Preview
+
+### Desktop preview
+![Desktop preview](images/desktop-preview.png)
+
+### Mobile preview
+<img src="images/mobile-preview.jpg" alt="Mobile preview" width="300"/>
+
 ## Quick start (Docker Compose)
 
 ### Requirements
