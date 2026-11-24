@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Response, status
 
-from src.auth.dependencies import get_auth_service
+from src.auth.dependencies import get_auth_service, get_current_user_id
 from src.auth.schemas import TokenResponse
 from src.auth.service import AuthService
 from src.core.config import settings
-from src.core.exceptions import EmailIsTakenError, UsernameIsTakenError
+from src.core.exceptions import EmailIsTakenError, UsernameIsTakenError, WrongUserError
 from src.users.dependencies import get_current_user, get_user_service
 from src.users.models import User
 from src.users.schemas import NewUserResponse, UserCreate, UserResponse
@@ -92,5 +92,8 @@ async def get_user(user_id: int, service: UserService = Depends(get_user_service
 async def delete_user(
     user_id: int,
     service: UserService = Depends(get_user_service),
+    current_user_id: int = Depends(get_current_user_id),
 ):
+    if current_user_id != user_id:
+        raise WrongUserError()
     await service.delete_user(user_id)
